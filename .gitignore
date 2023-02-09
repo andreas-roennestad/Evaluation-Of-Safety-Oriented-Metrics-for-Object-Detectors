@@ -128,5 +128,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# Results
-./results
+# Files
+./metrics_model/planner.pt
+./metrics_model/masks_trainval.json
