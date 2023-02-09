@@ -129,5 +129,6 @@ dmypy.json
 .pyre/
 
 # Files
+./results
 ./metrics_model/planner.pt
 ./metrics_model/masks_trainval.json
