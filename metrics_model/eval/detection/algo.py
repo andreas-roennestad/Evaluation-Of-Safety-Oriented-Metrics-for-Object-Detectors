@@ -239,8 +239,6 @@ def accumulate(gt_boxes: EvalBoxes,
 
 
 
-    if single_sample: 
-        # If saving metric data for single sample, save differet errors
 
     # ---------------------------------------------
     # Done. Instantiate MetricData and return

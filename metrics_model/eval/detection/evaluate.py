@@ -264,8 +264,8 @@ class DetectionEval:
         metrics = DetectionMetrics(self.cfg)
         AP_summary = {'Model': [], 'MAX_DISTANCE_OBJ': [],'MAX_DISTANCE_INTERSECT': [], 'MAX_TIME_INTERSECT': [],
                       'class_name': [], 'dist_th': [],'ap': [], 'ap_crit': [], 'mean_ap': None, 'mean_ap_crit': None,
-                      'pred_boxes_cars': [box.serialize() if box.detection_name=='car' for box in boxes_pred]}
-    
+                      'errors': }
+
 
         
         # Compute APs.
@@ -303,6 +303,12 @@ class DetectionEval:
         with open(os.path.join(save_path,'AP_SUMMARY_{}.json'.format(sample_token)), 'w') as fp:
             # Save APs in json format 
             json.dump(AP_summary, fp)
+
+        metrics_summary = metrics.serialize()
+        metrics_summary['meta'] = self.meta.copy()
+        with open(os.path.join(save_path, 'metrics_summary_{}.json'.format(sample_token)), 'w') as f:
+            json.dump(metrics_summary, f, indent=2)
+
         print("Saved metric data for sample {}".format(sample_token))
         
 
