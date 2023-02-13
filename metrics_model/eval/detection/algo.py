@@ -15,7 +15,8 @@ def accumulate(gt_boxes: EvalBoxes,
                class_name: str,
                dist_fcn: Callable,
                dist_th: float,
-               verbose: bool = False, 
+               verbose: bool = False,
+               single_sample: bool = False, 
                path="None",
                model_name="None",
                MAX_DISTANCE_OBJ=0.0,
@@ -202,24 +203,24 @@ def accumulate(gt_boxes: EvalBoxes,
     rec = rec_interp
     rec_crit = rec_crit_interp
     
-    f = open(path+"/confusion matrix.txt", "a")
-    f.write("Model "+str(model_name)+
-            "; MAX_DISTANCE_OBJ "+str(MAX_DISTANCE_OBJ)+
-            "; MAX_DISTANCE_INTERSECT "+str(MAX_DISTANCE_INTERSECT)+
-            "; MAX_TIME_INTERSECT "+str(MAX_TIME_INTERSECT)+
-            "; class_name "+str(class_name)+
-            "; dist_th "+str(dist_th)+
-            "; max tp "+str(np.amax(tp))+
-            "; max fp "+str(np.amax(fp))+
-            "; min fn "+str(np.sum(npos)-np.amax(tp))+
-            "; max tp_pred_crit "+str(np.amax(tp_pred_crit))+
-            "; max tp_gt_crit "+str(np.amax(tp_gt_crit))+
-            "; max fp_pred_crit "+str(np.amax(fp_pred_crit))+
-            "; min fn_gt_crit "+ str(np.sum(npos_crit)-np.sum(tp_pred_crit_app))+
-            "\n")
-            
-    f.close()
-
+    if not single_sample:
+        f = open(path+"/confusion matrix.txt", "a")
+        f.write("Model "+str(model_name)+
+                "; MAX_DISTANCE_OBJ "+str(MAX_DISTANCE_OBJ)+
+                "; MAX_DISTANCE_INTERSECT "+str(MAX_DISTANCE_INTERSECT)+
+                "; MAX_TIME_INTERSECT "+str(MAX_TIME_INTERSECT)+
+                "; class_name "+str(class_name)+
+                "; dist_th "+str(dist_th)+
+                "; max tp "+str(np.amax(tp))+
+                "; max fp "+str(np.amax(fp))+
+                "; min fn "+str(np.sum(npos)-np.amax(tp))+
+                "; max tp_pred_crit "+str(np.amax(tp_pred_crit))+
+                "; max tp_gt_crit "+str(np.amax(tp_gt_crit))+
+                "; max fp_pred_crit "+str(np.amax(fp_pred_crit))+
+                "; min fn_gt_crit "+ str(np.sum(npos_crit)-np.sum(tp_pred_crit_app))+
+                "\n")
+                
+        f.close()
 
     # ---------------------------------------------
     # Re-sample the match-data to match, prec, recall and conf.
@@ -235,6 +236,11 @@ def accumulate(gt_boxes: EvalBoxes,
 
             # Then interpolate based on the confidences. (Note reversing since np.interp needs increasing arrays)
             match_data[key] = np.interp(conf[::-1], match_data['conf'][::-1], tmp[::-1])[::-1]
+
+
+
+    if single_sample: 
+        # If saving metric data for single sample, save differet errors
 
     # ---------------------------------------------
     # Done. Instantiate MetricData and return

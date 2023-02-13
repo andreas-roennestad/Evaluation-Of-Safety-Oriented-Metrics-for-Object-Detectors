@@ -102,6 +102,8 @@ def visualize_sample(nusc: NuScenes,
     else:
         plt.show()
 
+
+
 def visualize_sample_crit(nusc: NuScenes,
                      sample_token: str,
                      gt_boxes: EvalBoxes,

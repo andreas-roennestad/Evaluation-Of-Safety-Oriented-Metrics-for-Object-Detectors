@@ -142,8 +142,8 @@ class DetectionEval:
         if self.verbose:
             print('Calculating metrics...')
         metrics = DetectionMetrics(self.cfg)
-        #f = open(self.output_dir+"/AP_SUMMARY.txt", "a")
-        #f.write("Model;MAX_DISTANCE_OBJ;MAX_DISTANCE_INTERSECT;MAX_TIME_INTERSECT;class_name;dist_th;ap;ap_crit\n")
+        f = open(self.output_dir+"/AP_SUMMARY.txt", "a")
+        f.write("Model;MAX_DISTANCE_OBJ;MAX_DISTANCE_INTERSECT;MAX_TIME_INTERSECT;class_name;dist_th;ap;ap_crit\n")
         AP_summary = {'Model': [], 'MAX_DISTANCE_OBJ': [],'MAX_DISTANCE_INTERSECT': [], 'MAX_TIME_INTERSECT': [],
                       'class_name': [], 'dist_th': [],'ap': [], 'ap_crit': []}
         
@@ -155,14 +155,16 @@ class DetectionEval:
                 metrics.add_label_ap(class_name, dist_th, ap)
                 ap_crit=calc_ap_crit(metric_data, self.cfg.min_recall, self.cfg.min_precision)
                 metrics.add_label_ap_crit(class_name, dist_th, ap_crit)
-                """f.write(str(self.model_name)+
+                f.write(str(self.model_name)+
                         ";"+str(self.MAX_DISTANCE_OBJ)+
                         ";"+str(self.MAX_DISTANCE_INTERSECT)+
                         ";"+str(self.MAX_TIME_INTERSECT)+
                         ";"+str(class_name)+
                         ";"+str(dist_th)+
                         ";"+str(ap)+
-                        ";"+str(ap_crit)+"\n")"""
+                        ";"+str(ap_crit)+"\n")
+
+                ## Create summary in json ##
                 AP_summary['Model'].append(self.model_name)
                 AP_summary['MAX_DISTANCE_OBJ'].append(self.MAX_DISTANCE_OBJ)
                 AP_summary['MAX_DISTANCE_INTERSECT'].append(self.MAX_DISTANCE_INTERSECT)
@@ -187,8 +189,10 @@ class DetectionEval:
 
         # Compute evaluation time.
         metrics.add_runtime(time.time() - start_time)
-        #f.close()
-        with open(os.path.join(self.output_dir,'/AP_SUMMARY.json'), 'w') as fp:
+        f.close()
+        with open(os.path.join(self.output_dir,'AP_SUMMARY.json'), 'w') as fp:
+            print("Saved AP_SUMMARY json..\n")
+            # Save APs in json format 
             json.dump(AP_summary, fp)
 
         return metrics, metric_data_list
@@ -231,6 +235,129 @@ class DetectionEval:
             dist_pr_curve(md_list, metrics, dist_th, self.cfg.min_precision, self.cfg.min_recall,
                           savepath=savepath('dist_pr_' + str(dist_th)))
 
+    def calc_sample_crit(self, sample_token: str, save_path: str):
+        # Get boxes.
+
+        # Get boxes corresponding to sample
+        boxes_gt = EvalBoxes.deserialize({sample_token : self.gt_boxes.serialize()[sample_token]}, DetectionBox, self.nusc)
+        boxes_pred = EvalBoxes.deserialize({sample_token : self.pred_boxes.serialize()[sample_token]}, DetectionBox, self.nusc)
+        
+        #boxes_gt.add_boxes(sample_token, boxes_gt)
+        #boxes_pred.add_boxes(sample_token, boxes_pred)
+        # Accumulate metric data for specific sample
+        metric_data_list = DetectionMetricDataList()
+        class_name = 'car'
+        for dist_th in self.cfg.dist_ths:
+            md = accumulate(boxes_gt, boxes_pred, class_name, 
+                            self.cfg.dist_fcn_callable, dist_th, path=save_path,
+                            model_name=self.model_name, 
+                            MAX_DISTANCE_OBJ=self.MAX_DISTANCE_OBJ, 
+                            MAX_DISTANCE_INTERSECT=self.MAX_DISTANCE_INTERSECT,
+                            MAX_TIME_INTERSECT=self.MAX_TIME_INTERSECT,
+                            recall_type=self.recall_type, verbose=False)
+            metric_data_list.set(class_name, dist_th, md)
+
+
+        # Calculate metrics from the data.
+        if self.verbose:
+            print('Calculating metrics...')
+        metrics = DetectionMetrics(self.cfg)
+        AP_summary = {'Model': [], 'MAX_DISTANCE_OBJ': [],'MAX_DISTANCE_INTERSECT': [], 'MAX_TIME_INTERSECT': [],
+                      'class_name': [], 'dist_th': [],'ap': [], 'ap_crit': [], 'mean_ap': None, 'mean_ap_crit': None,
+                      'pred_boxes_cars': [box.serialize() if box.detection_name=='car' for box in boxes_pred]}
+    
+
+        
+        # Compute APs.
+        for dist_th in self.cfg.dist_ths:
+            metric_data = metric_data_list[(class_name, dist_th)]
+            ap = calc_ap(metric_data, self.cfg.min_recall, self.cfg.min_precision)
+            metrics.add_label_ap(class_name, dist_th, ap)
+            ap_crit=calc_ap_crit(metric_data, self.cfg.min_recall, self.cfg.min_precision)
+            metrics.add_label_ap_crit(class_name, dist_th, ap_crit)
+            ## Create summary in json ##
+            AP_summary['Model'].append(self.model_name)
+            AP_summary['MAX_DISTANCE_OBJ'].append(self.MAX_DISTANCE_OBJ)
+            AP_summary['MAX_DISTANCE_INTERSECT'].append(self.MAX_DISTANCE_INTERSECT)
+            AP_summary['MAX_TIME_INTERSECT'].append(self.MAX_TIME_INTERSECT)
+            AP_summary['class_name'].append(class_name)
+            AP_summary['dist_th'].append(dist_th)
+            AP_summary['ap'].append(ap)
+            AP_summary['ap_crit'].append(ap_crit)
+            
+            # Compute TP metrics.
+            for metric_name in TP_METRICS:
+                metric_data = metric_data_list[(class_name, self.cfg.dist_th_tp)]
+                if class_name in ['traffic_cone'] and metric_name in ['attr_err', 'vel_err', 'orient_err']:
+                    tp = np.nan
+                elif class_name in ['barrier'] and metric_name in ['attr_err', 'vel_err']:
+                    tp = np.nan
+                else:
+                    tp = calc_tp(metric_data, self.cfg.min_recall, metric_name)
+                metrics.add_label_tp(class_name, metric_name, tp)
+
+        AP_summary['mean_ap'] = metrics.mean_ap
+        AP_summary['mean_ap_crit'] = metrics.mean_ap_crit
+
+        # Compute evaluation time.
+        with open(os.path.join(save_path,'AP_SUMMARY_{}.json'.format(sample_token)), 'w') as fp:
+            # Save APs in json format 
+            json.dump(AP_summary, fp)
+        print("Saved metric data for sample {}".format(sample_token))
+        
+
+
+
+    def safety_metric_evaluation(self, 
+                                save_metrics_samples: int,
+                                pkl_path: str,
+                                worst_best: bool) -> None:
+        """ collection of relevant samples
+         and metric data for safety-oriented metrics.
+         :param save_metric_samples: number of samples to evaluate/save
+         :param save_pkl: lookup PKL of sample in file
+         :param worst_best: worst visualizations for worst and best PKL results """
+        # random subset
+        #random.seed(42)
+        sample_tokens = list(self.sample_tokens)
+        random.shuffle(sample_tokens)
+        sample_tokens = sample_tokens[:save_metrics_samples]
+
+        # Create necessary directories
+        samples_directory = os.path.join(self.output_dir, 'METRIC_SAMPLES')
+        if not os.path.isdir(samples_directory):
+                os.mkdir(samples_directory)
+
+        for sample_token in sample_tokens:
+            ##
+            sample_dir = os.path.join(samples_directory, str(sample_token))
+            if not os.path.isdir(sample_dir):
+                os.mkdir(sample_dir)
+                print("Made sample directory: {}\n".format(sample_dir))
+
+            # Collect relevant samples with necessary annotations
+            sample = self.nusc.get('sample', sample_token)
+            #cam_front_data = self.nusc.get('sample_data', sample['data']['CAM_FRONT'])
+            #cam_right_data = self.nusc.get('sample_data', sample['data']['CAM_FRONT_RIGHT'])
+            #cam_left_data = self.nusc.get('sample_data', sample['data']['CAM_FRONT_LEFT'])
+            ## Save lidar birds eye (with crit vals)
+            visualize_sample_crit(self.nusc,
+                             sample_token,
+                             self.gt_boxes if self.eval_set != 'test' else EvalBoxes(),
+                             # Don't render test GT.
+                             self.pred_boxes,
+                             eval_range=max(self.cfg.class_range.values()),
+                             savepath=os.path.join(sample_dir, 'LIDAR_CRIT_{}.png'.format(sample_token)))
+            
+            ## Save sample specific metric data
+            self.calc_sample_crit(sample_token=sample_token, save_path=sample_dir)
+            
+            ## Save images with annotations
+            self.nusc.render_sample(sample_token, out_path=os.path.join(sample_dir, 'SENSOR_ANN_VIZ_{}.png'.format(sample_token)))
+            
+            print("Sample {} data saved.\n".format(sample_token))
+        
+
     def main(self,
              plot_examples: int = 0,
              render_curves: bool = True, 
@@ -238,7 +365,8 @@ class DetectionEval:
              MAX_DISTANCE_OBJ=0.0,
              MAX_DISTANCE_INTERSECT=0.0,
              MAX_TIME_INTERSECT=0.0,
-             recall_type="NONE") -> Dict[str, Any]:
+             recall_type="NONE",
+             save_metrics_samples=0) -> Dict[str, Any]:
 
         self.model_name=model_name
         self.MAX_DISTANCE_OBJ=MAX_DISTANCE_OBJ
@@ -249,10 +377,18 @@ class DetectionEval:
         Main function that loads the evaluation code, visualizes samples, runs the evaluation and renders stat plots.
         :param plot_examples: How many example visualizations to write to disk.
         :param render_curves: Whether to render PR and TP curves to disk.
+        :param save_metrics_samples(int) save safety metrics related data for individual samples and save data with samples.
+
+
         :return: A dict that stores the high-level metrics and meta data.
         """
         print("STARTING EVALUATION in main (self)")
-        
+        if save_metrics_samples > 0:
+            self.safety_metric_evaluation(save_metrics_samples, None, False)
+    
+
+
+
         if plot_examples > 0:
             # Select a random but fixed subset to plot.
             random.seed(42)

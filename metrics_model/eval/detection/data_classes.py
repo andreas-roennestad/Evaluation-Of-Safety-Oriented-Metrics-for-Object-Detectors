@@ -239,7 +239,7 @@ class DetectionMetrics:
         return {class_name: np.mean(list(d.values())) for class_name, d in self._label_aps.items()}
 
     @property
-    def mean_dist_aps(self) -> Dict[str, float]:
+    def mean_dist_aps_crit(self) -> Dict[str, float]:
         """ Calculates the mean over distance thresholds for each label. """
         return {class_name: np.mean(list(d.values())) for class_name, d in self._label_aps_crit.items()}
 
