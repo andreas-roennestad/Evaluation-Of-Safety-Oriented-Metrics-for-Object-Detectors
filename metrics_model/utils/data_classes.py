@@ -632,7 +632,8 @@ class Box:
                view: np.ndarray = np.eye(3),
                normalize: bool = False,
                colors: Tuple = ('b', 'r', 'k'),
-               linewidth: float = 2 ) -> None:
+               linewidth: float = 2,
+               offset_text = False) -> None:
         """
         Renders the box in the provided Matplotlib axis.
         :param axis: Axis onto which the box should be drawn.
@@ -641,6 +642,7 @@ class Box:
         :param colors: (<Matplotlib.colors>: 3). Valid Matplotlib colors (<str> or normalized RGB tuple) for front,
             back and sides.
         :param linewidth: Width in pixel of the box sides.
+        :param offset_text: if True, display text in opposite corner to account for overlapping BBs in visualization
         """
         if(self.name!='car'): #WORKS ONLY TO VISUALIZE CARS IN THIS WAY
             return
@@ -664,8 +666,10 @@ class Box:
         draw_rect(corners.T[:4], colors[0])
         draw_rect(corners.T[4:], colors[1])
         #print("utils.data_classes.py: "+str(self.name))
-
-        axis.text(corners.T[0][0],corners.T[0][1], "%.2f" % self.crit, color=colors[0], fontsize=12)
+        if offset_text == True:
+            axis.text(corners.T[0][0],corners.T[0][1]-3, "%.2f" % self.crit, color=colors[0], fontsize=12)
+        else:
+            axis.text(corners.T[0][0],corners.T[0][1], "%.2f" % self.crit, color=colors[0], fontsize=12)
 
         # Draw line indicating the front
         center_bottom_forward = np.mean(corners.T[2:4], axis=0)
@@ -679,7 +683,8 @@ class Box:
                view: np.ndarray = np.eye(3),
                normalize: bool = False,
                colors: Tuple = ('b', 'r', 'k'),
-               linewidth: float = 2 ) -> None:
+               linewidth: float = 2,
+               offset_text = False) -> None:
         """
         Renders the box in the provided Matplotlib axis.
         :param axis: Axis onto which the box should be drawn.
@@ -712,7 +717,10 @@ class Box:
         draw_rect(corners.T[4:], colors[1])
         #print("utils.data_classes.py: "+str(self.name))
 
-        axis.text(corners.T[0][0],corners.T[0][1], "%.2f" % self.crit_d, color=colors[0], fontsize=12)
+        if offset_text == True:
+            axis.text(corners.T[0][0],corners.T[0][1]-3, "%.2f" % self.crit_d, color=colors[0], fontsize=12)
+        else:
+            axis.text(corners.T[0][0],corners.T[0][1], "%.2f" % self.crit_d, color=colors[0], fontsize=12)
 
         # Draw line indicating the front
         center_bottom_forward = np.mean(corners.T[2:4], axis=0)
@@ -726,7 +734,8 @@ class Box:
                view: np.ndarray = np.eye(3),
                normalize: bool = False,
                colors: Tuple = ('b', 'r', 'k'),
-               linewidth: float = 2 ) -> None:
+               linewidth: float = 2,
+               offset_text = False ) -> None:
         """
         Renders the box in the provided Matplotlib axis.
         :param axis: Axis onto which the box should be drawn.
@@ -759,8 +768,10 @@ class Box:
         draw_rect(corners.T[4:], colors[1])
         #print("utils.data_classes.py: "+str(self.name))
 
-        axis.text(corners.T[0][0],corners.T[0][1], "%.2f" % self.crit_t, color=colors[0], fontsize=12)
-
+        if offset_text == True:
+            axis.text(corners.T[0][0],corners.T[0][1]-3, "%.2f" % self.crit_t, color=colors[0], fontsize=12)
+        else:
+            axis.text(corners.T[0][0],corners.T[0][1], "%.2f" % self.crit_t, color=colors[0], fontsize=12)
         # Draw line indicating the front
         center_bottom_forward = np.mean(corners.T[2:4], axis=0)
         center_bottom = np.mean(corners.T[[2, 3, 7, 6]], axis=0)
@@ -774,7 +785,8 @@ class Box:
                view: np.ndarray = np.eye(3),
                normalize: bool = False,
                colors: Tuple = ('b', 'r', 'k'),
-               linewidth: float = 2 ) -> None:
+               linewidth: float = 2,
+               offset_text = False ) -> None:
         """
         Renders the box in the provided Matplotlib axis.
         :param axis: Axis onto which the box should be drawn.
@@ -807,7 +819,10 @@ class Box:
         draw_rect(corners.T[4:], colors[1])
         #print("utils.data_classes.py: "+str(self.name))
 
-        axis.text(corners.T[0][0],corners.T[0][1], "%.2f" % self.crit_r, color=colors[0], fontsize=12)
+        if offset_text == True:
+            axis.text(corners.T[0][0],corners.T[0][1]-3, "%.2f" % self.crit_r, color=colors[0], fontsize=12)
+        else:
+            axis.text(corners.T[0][0],corners.T[0][1], "%.2f" % self.crit_r, color=colors[0], fontsize=12)
         #axis.text(corners.T[1][0],corners.T[1][1], "%.2f" % self.velocity[0], color=colors[0], fontsize=12)
 
         

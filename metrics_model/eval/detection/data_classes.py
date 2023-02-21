@@ -153,7 +153,9 @@ class DetectionMetricData(MetricData):
         """ Serialize instance into json-friendly format. """
         return {
             'recall': self.recall.tolist(),
+            'recall_crit': self.recall_crit.tolist(),
             'precision': self.precision.tolist(),
+            'precision_crit': self.precision_crit.tolist(),
             'confidence': self.confidence.tolist(),
             'trans_err': self.trans_err.tolist(),
             'vel_err': self.vel_err.tolist(),
@@ -362,7 +364,7 @@ class DetectionBox(EvalBox):
                  detection_score: float = -1.0,  # GT samples do not have a score.
                  attribute_name: str = '',  # Box attribute. Each box can have at most 1 attribute.
                  ego_speed: float = 9999.0,  # default speed di ego; should be always overwritten
-                 nusc = None
+                 nusc = None, 
                 ):
 
         super().__init__(sample_token, translation, size, rotation, velocity, ego_translation, num_pts)
@@ -578,7 +580,6 @@ class DetectionBox(EvalBox):
     @classmethod
     def deserialize(cls, content: dict, nusc):
         """ Initialize from serialized content. """
-        #print(type(cls))
         return cls(sample_token=content['sample_token'],
                    translation=tuple(content['translation']),
                    size=tuple(content['size']),

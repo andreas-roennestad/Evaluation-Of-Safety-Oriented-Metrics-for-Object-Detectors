@@ -2,9 +2,9 @@
 # Code written by Oscar Beijbom, 2019.
 
 from typing import Callable
-
 import numpy as np
 import math
+import json
 from nuscenes.eval.common.data_classes import EvalBoxes
 from nuscenes.eval.common.utils import center_distance, scale_iou, yaw_diff, velocity_l2, attr_acc, cummean
 from nuscenes.eval.detection.data_classes import DetectionMetricData
@@ -69,11 +69,11 @@ def accumulate(gt_boxes: EvalBoxes,
               format(npos_crit, class_name, len(gt_boxes.all), len(gt_boxes.sample_tokens)))
 
     # For missing classes in the GT, return a data structure corresponding to no predictions.
-    if npos == 0:
-        print("ALGO.PY WARNING : NO GT PREDICTIONS")
+    if npos == 0 and not single_sample: # if viewing individual samples this will generate warning for all classes not present in scene
+        print("ALGO.PY WARNING : NO GT PREDICTIONS, CLASS: {}".format(class_name))
         return DetectionMetricData.no_predictions()
-    if npos_crit == 0:
-        print("ALGO.PY WARNING : NO CRIT GT PREDICTIONS")
+    if npos_crit == 0 and not single_sample:
+        print("ALGO.PY WARNING : NO CRIT GT PREDICTIONS, CLASS: {}".format(class_name))
         return DetectionMetricData.no_predictions()
 
     # Organize the predictions in a single list.
@@ -114,7 +114,6 @@ def accumulate(gt_boxes: EvalBoxes,
         min_dist = np.inf
         match_gt_idx = None
         for gt_idx, gt_box in enumerate(gt_boxes[pred_box.sample_token]):
-
             # Find closest match among ground truth boxes
             if gt_box.detection_name == class_name and not (pred_box.sample_token, gt_idx) in taken:
                 this_distance = dist_fcn(gt_box, pred_box)
@@ -132,6 +131,7 @@ def accumulate(gt_boxes: EvalBoxes,
             tp.append(1)
             tp_pred_crit.append(pred_box.crit)
             
+            
             fp.append(0)
             fp_pred_crit.append(0)
 
@@ -140,7 +140,7 @@ def accumulate(gt_boxes: EvalBoxes,
             # Since it is a match, update match data also.
             gt_box_match = gt_boxes[pred_box.sample_token][match_gt_idx]
             tp_gt_crit.append(gt_box_match.crit)
-            
+
             match_data['trans_err'].append(center_distance(gt_box_match, pred_box))
             match_data['vel_err'].append(velocity_l2(gt_box_match, pred_box))
             match_data['scale_err'].append(1 - scale_iou(gt_box_match, pred_box))
@@ -186,14 +186,27 @@ def accumulate(gt_boxes: EvalBoxes,
     prec = tp / (fp + tp)
     rec = tp / float(npos)
     
-    prec_crit= tp_pred_crit/(fp_pred_crit + tp_pred_crit) #TODO: ha dato 1 warning su runtime value not valid???
+    # Calculate precision and recall.
+    prec = tp / (fp + tp)
+    rec = tp / float(npos)
+    
     if(recall_type=="GT AL NUMERATORE"):
+        prec_crit= tp_pred_crit/(fp_pred_crit + tp_pred_crit) #TODO: ha dato 1 warning su runtime value not valid???
         rec_crit= tp_gt_crit/(npos_crit)
     elif(recall_type=="PRED AL NUMERATORE"):
         rec_crit= tp_pred_crit/(npos_crit)
+        prec_crit= tp_gt_crit/(fp_pred_crit + tp_pred_crit) #TODO: ha dato 1 warning su runtime value not valid???
+        for i in range(len(rec_crit)):
+            if (rec_crit[i]>1.0):
+                rec_crit[i]=1.0
+        for i in range(len(prec_crit)):
+            if (prec_crit[i]>1.0):
+                prec_crit[i]=1.0
     else:
         print("BIG MISTAKE IN ALGO.PY ON COMPUTING RECALL_CRIT")
-        sys.exit(0)   
+        sys.exit(0)  
+
+
     rec_interp = np.linspace(0, 1, DetectionMetricData.nelem)  # 101 steps, from 0% to 100% recall.
     rec_crit_interp = np.linspace(0, 1, DetectionMetricData.nelem)  # 101 steps, from 0% to 100% recall.
 
@@ -204,7 +217,7 @@ def accumulate(gt_boxes: EvalBoxes,
     rec_crit = rec_crit_interp
     
     if not single_sample:
-        f = open(path+"/confusion matrix.txt", "a")
+        f = open(path+"/confusion_matrix.txt", "a")
         f.write("Model "+str(model_name)+
                 "; MAX_DISTANCE_OBJ "+str(MAX_DISTANCE_OBJ)+
                 "; MAX_DISTANCE_INTERSECT "+str(MAX_DISTANCE_INTERSECT)+
@@ -219,7 +232,47 @@ def accumulate(gt_boxes: EvalBoxes,
                 "; max fp_pred_crit "+str(np.amax(fp_pred_crit))+
                 "; min fn_gt_crit "+ str(np.sum(npos_crit)-np.sum(tp_pred_crit_app))+
                 "\n")
-                
+        f.close()
+    else:
+        # Precision and recall values for sample computed
+        tp_s = np.amax(tp)
+        fp_s = np.amax(fp)
+        tp_s_crit = np.amax(tp_pred_crit)
+        fp_s_crit = np.amax(fp_pred_crit)
+        tp_gts_crit = np.amax(tp_gt_crit)
+        prec_s = tp_s / (fp_s + tp_s)
+        rec_s = tp_s / float(npos)
+        #prec_s_crit = tp_s_crit / (fp_s_crit + tp_s_crit)
+        #rec_s_crit = tp_s_crit / float(npos_crit)
+
+
+        if(recall_type=="GT AL NUMERATORE"):
+            prec_s_crit= tp_s_crit/(fp_s_crit + tp_s_crit) 
+            rec_s_crit= tp_gts_crit/(npos_crit)
+        elif(recall_type=="PRED AL NUMERATORE"):
+            rec_s_crit= tp_s_crit/(npos_crit)
+            prec_s_crit= tp_gts_crit/(fp_s_crit + tp_s_crit) 
+            if (rec_s_crit>1.0):
+                rec_s_crit=1.0
+            if (prec_s_crit>1.0):
+                prec_s_crit=1.0
+
+        f = open(path+"/PR_summary.txt", "a")
+        f.write("Model "+str(model_name)+
+                "; class_name "+str(class_name)+
+                "; dist_th "+str(dist_th)+
+                "; TPs "+str(np.amax(tp))+
+                "; FPs "+str(np.amax(fp))+
+                "; FNs "+str(np.sum(npos)-np.amax(tp))+
+                "; TPs_pred_crit "+str(np.amax(tp_pred_crit))+
+                "; TPs_gt_crit "+str(np.amax(tp_gt_crit))+
+                "; FPs_pred_crit "+str(np.amax(fp_pred_crit))+
+                "; FNs_gt_crit "+ str(np.sum(npos_crit)-np.sum(tp_pred_crit_app))+   
+                "; Prec "+ str(prec_s)+
+                "; Rec "+ str(rec_s)+
+                "; Prec_crit "+ str(prec_s_crit)+
+                "; Rec_crit "+ str(rec_s_crit) +
+                "\n")
         f.close()
 
     # ---------------------------------------------

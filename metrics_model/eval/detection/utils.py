@@ -2,7 +2,7 @@
 # Code written by Holger Caesar, 2018.
 
 from typing import List, Optional
-
+import pandas as pd
 
 def category_to_detection_name(category_name: str) -> Optional[str]:
     """
@@ -54,3 +54,6 @@ def detection_name_to_rel_attributes(detection_name: str) -> List[str]:
 
     return rel_attributes
 
+def json_to_csv(json_obj: dict, out_path: str) -> None:
+    df = pd.DataFrame.from_dict(json_obj) 
+    df.to_csv (out_path, index = False, header=True)

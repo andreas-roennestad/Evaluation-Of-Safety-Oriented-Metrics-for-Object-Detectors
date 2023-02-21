@@ -1,0 +1,10 @@
+Model ssn-REGNET; class_name car; dist_th 2.0; AP 0.6239623750734862; AP_crit 0.7491966308613219
+Model ssn-REGNET; class_name truck; dist_th 2.0; AP 0.0; AP_crit 0.0
+Model ssn-REGNET; class_name bus; dist_th 2.0; AP 0.0; AP_crit 0.0
+Model ssn-REGNET; class_name trailer; dist_th 2.0; AP 0.0; AP_crit 0.0
+Model ssn-REGNET; class_name construction_vehicle; dist_th 2.0; AP 0.0; AP_crit 0.0
+Model ssn-REGNET; class_name pedestrian; dist_th 2.0; AP 0.9123702883392807; AP_crit 0.9516354412826014
+Model ssn-REGNET; class_name motorcycle; dist_th 2.0; AP 0.0; AP_crit 0.0
+Model ssn-REGNET; class_name bicycle; dist_th 2.0; AP 0.0; AP_crit 0.0
+Model ssn-REGNET; class_name traffic_cone; dist_th 2.0; AP 0.054629629629629625; AP_crit 0.062099945530493104
+Model ssn-REGNET; class_name barrier; dist_th 2.0; AP 0.0; AP_crit 0.0

@@ -1,0 +1,10 @@
+Model regnet-regnetX_FPN; class_name car; dist_th 2.0; AP 0.8085573845450389; AP_crit 0.48060549534242036
+Model regnet-regnetX_FPN; class_name truck; dist_th 2.0; AP 0.9888888888888892; AP_crit 0.9886658167617725
+Model regnet-regnetX_FPN; class_name bus; dist_th 2.0; AP 0.0; AP_crit 0.0
+Model regnet-regnetX_FPN; class_name trailer; dist_th 2.0; AP 0.0; AP_crit 0.0
+Model regnet-regnetX_FPN; class_name construction_vehicle; dist_th 2.0; AP 0.0; AP_crit 0.0
+Model regnet-regnetX_FPN; class_name pedestrian; dist_th 2.0; AP 0.9905782975958416; AP_crit 0.9888702873407194
+Model regnet-regnetX_FPN; class_name motorcycle; dist_th 2.0; AP 0.0; AP_crit 0.0
+Model regnet-regnetX_FPN; class_name bicycle; dist_th 2.0; AP 0.0; AP_crit 0.0
+Model regnet-regnetX_FPN; class_name traffic_cone; dist_th 2.0; AP 0.0; AP_crit 0.0
+Model regnet-regnetX_FPN; class_name barrier; dist_th 2.0; AP 0.45749379490158576; AP_crit 0.4605996145686375

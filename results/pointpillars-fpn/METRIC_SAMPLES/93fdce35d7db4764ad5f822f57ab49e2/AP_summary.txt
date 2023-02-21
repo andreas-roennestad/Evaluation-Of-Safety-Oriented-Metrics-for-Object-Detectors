@@ -1,0 +1,10 @@
+Model pointpillars-fpn; class_name car; dist_th 2.0; AP 0.9338220745662608; AP_crit 0.9910351656938777
+Model pointpillars-fpn; class_name truck; dist_th 2.0; AP 0.0; AP_crit 0.0
+Model pointpillars-fpn; class_name bus; dist_th 2.0; AP 0.0; AP_crit 0.0
+Model pointpillars-fpn; class_name trailer; dist_th 2.0; AP 0.0; AP_crit 0.0
+Model pointpillars-fpn; class_name construction_vehicle; dist_th 2.0; AP 0.0; AP_crit 0.0
+Model pointpillars-fpn; class_name pedestrian; dist_th 2.0; AP 0.9888888888888892; AP_crit 0.9764073588264124
+Model pointpillars-fpn; class_name motorcycle; dist_th 2.0; AP 0.0; AP_crit 0.0
+Model pointpillars-fpn; class_name bicycle; dist_th 2.0; AP 0.0; AP_crit 0.0
+Model pointpillars-fpn; class_name traffic_cone; dist_th 2.0; AP 0.12119008953798666; AP_crit 0.1217482606573475
+Model pointpillars-fpn; class_name barrier; dist_th 2.0; AP 0.0; AP_crit 0.0

@@ -179,7 +179,7 @@ def visualize_sample_crit(nusc: NuScenes,
         #print("detection/render.py box.crit_d: "+str(box.crit_d))
         #print("detection/render.py box.crit_r: "+str(box.crit_r))
         if box.score >= conf_th:
-            box.render_crit(ax, view=np.eye(4), colors=('b', 'b', 'b'), linewidth=1)
+            box.render_crit(ax, view=np.eye(4), colors=('b', 'b', 'b'), linewidth=1, offset_text=True)
 
     # Limit visible range.
     axes_limit = eval_range + 3  # Slightly bigger to include boxes that extend beyond the range.
@@ -261,7 +261,7 @@ def visualize_sample_crit_r(nusc: NuScenes,
         # Show only predictions with a high score.
         assert not np.isnan(box.score), 'Error: Box score cannot be NaN!'
         if box.score >= conf_th:
-            box.render_crit_r(ax, view=np.eye(4), colors=('b', 'b', 'b'), linewidth=1)
+            box.render_crit_r(ax, view=np.eye(4), colors=('b', 'b', 'b'), linewidth=1, offset_text = True)
 
     # Limit visible range.
     axes_limit = eval_range + 3  # Slightly bigger to include boxes that extend beyond the range.
@@ -344,7 +344,7 @@ def visualize_sample_crit_d(nusc: NuScenes,
         # Show only predictions with a high score.
         assert not np.isnan(box.score), 'Error: Box score cannot be NaN!'
         if box.score >= conf_th:
-            box.render_crit_d(ax, view=np.eye(4), colors=('b', 'b', 'b'), linewidth=1)
+            box.render_crit_d(ax, view=np.eye(4), colors=('b', 'b', 'b'), linewidth=1, offset_text=True)
 
     # Limit visible range.
     axes_limit = eval_range + 3  # Slightly bigger to include boxes that extend beyond the range.
@@ -427,7 +427,7 @@ def visualize_sample_crit_t(nusc: NuScenes,
         # Show only predictions with a high score.
         assert not np.isnan(box.score), 'Error: Box score cannot be NaN!'
         if box.score >= conf_th:
-            box.render_crit_t(ax, view=np.eye(4), colors=('b', 'b', 'b'), linewidth=1)
+            box.render_crit_t(ax, view=np.eye(4), colors=('b', 'b', 'b'), linewidth=1, offset_text = True)
 
     # Limit visible range.
     axes_limit = eval_range + 3  # Slightly bigger to include boxes that extend beyond the range.
