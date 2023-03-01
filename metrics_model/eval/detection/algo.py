@@ -218,19 +218,20 @@ def accumulate(gt_boxes: EvalBoxes,
     
     if not single_sample:
         f = open(path+"/confusion_matrix.txt", "a")
-        f.write("Model "+str(model_name)+
-                "; MAX_DISTANCE_OBJ "+str(MAX_DISTANCE_OBJ)+
-                "; MAX_DISTANCE_INTERSECT "+str(MAX_DISTANCE_INTERSECT)+
-                "; MAX_TIME_INTERSECT "+str(MAX_TIME_INTERSECT)+
-                "; class_name "+str(class_name)+
-                "; dist_th "+str(dist_th)+
-                "; max tp "+str(np.amax(tp))+
-                "; max fp "+str(np.amax(fp))+
-                "; min fn "+str(np.sum(npos)-np.amax(tp))+
-                "; max tp_pred_crit "+str(np.amax(tp_pred_crit))+
-                "; max tp_gt_crit "+str(np.amax(tp_gt_crit))+
-                "; max fp_pred_crit "+str(np.amax(fp_pred_crit))+
-                "; min fn_gt_crit "+ str(np.sum(npos_crit)-np.sum(tp_pred_crit_app))+
+        f.write("Model;MAX_DISTANCE_OBJ;MAX_DISTANCE_INTERSECT;MAX_TIME_INTERSECT;class_name;dist_th;max_tp;max_fp;min_fn;max_tp_pred_crit;max_tp_gt_crit;max_fp_pred_crit;min_fn_gt_crit\n")
+        f.write(str(model_name)+
+                ";"+str(MAX_DISTANCE_OBJ)+
+                ";"+str(MAX_DISTANCE_INTERSECT)+
+                ";"+str(MAX_TIME_INTERSECT)+
+                ";"+str(class_name)+
+                ";"+str(dist_th)+
+                ";"+str(np.amax(tp))+
+                ";"+str(np.amax(fp))+
+                ";"+str(np.sum(npos)-np.amax(tp))+
+                ";"+str(np.amax(tp_pred_crit))+
+                ";"+str(np.amax(tp_gt_crit))+
+                ";"+str(np.amax(fp_pred_crit))+
+                ";"+ str(np.sum(npos_crit)-np.sum(tp_pred_crit_app))+
                 "\n")
         f.close()
     else:
@@ -258,20 +259,21 @@ def accumulate(gt_boxes: EvalBoxes,
                 prec_s_crit=1.0
 
         f = open(path+"/PR_summary.txt", "a")
-        f.write("Model "+str(model_name)+
-                "; class_name "+str(class_name)+
-                "; dist_th "+str(dist_th)+
-                "; TPs "+str(np.amax(tp))+
-                "; FPs "+str(np.amax(fp))+
-                "; FNs "+str(np.sum(npos)-np.amax(tp))+
-                "; TPs_pred_crit "+str(np.amax(tp_pred_crit))+
-                "; TPs_gt_crit "+str(np.amax(tp_gt_crit))+
-                "; FPs_pred_crit "+str(np.amax(fp_pred_crit))+
-                "; FNs_gt_crit "+ str(np.sum(npos_crit)-np.sum(tp_pred_crit_app))+   
-                "; Prec "+ str(prec_s)+
-                "; Rec "+ str(rec_s)+
-                "; Prec_crit "+ str(prec_s_crit)+
-                "; Rec_crit "+ str(rec_s_crit) +
+        f.write("class_name;dist_th;TPs;FPs;FNs;TPs_pred_crit;TPs_gt_crit;FPs_pred_crit;FNs_gt_crit;Prec;Rec;Prec_crit;Rec_crit\n")
+        f.write(str(model_name)+
+                ";"+str(class_name)+
+                ";"+str(dist_th)+
+                ";"+str(np.amax(tp))+
+                ";"+str(np.amax(fp))+
+                ";"+str(np.sum(npos)-np.amax(tp))+
+                ";"+str(np.amax(tp_pred_crit))+
+                ";"+str(np.amax(tp_gt_crit))+
+                ";"+str(np.amax(fp_pred_crit))+
+                ";"+ str(np.sum(npos_crit)-np.sum(tp_pred_crit_app))+   
+                ";"+ str(prec_s)+
+                ";"+ str(rec_s)+
+                ";"+ str(prec_s_crit)+
+                ";"+ str(rec_s_crit) +
                 "\n")
         f.close()
 

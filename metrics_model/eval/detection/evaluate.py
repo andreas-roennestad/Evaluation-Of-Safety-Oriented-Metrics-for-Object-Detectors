@@ -6,7 +6,7 @@ import json
 import os
 import random
 import time
-from typing import Tuple, Dict, Any
+from typing import Tuple, Dict, Any, List
 
 import numpy as np
 
@@ -144,8 +144,6 @@ class DetectionEval:
         metrics = DetectionMetrics(self.cfg)
         f = open(self.output_dir+"/AP_SUMMARY.txt", "a")
         f.write("Model;MAX_DISTANCE_OBJ;MAX_DISTANCE_INTERSECT;MAX_TIME_INTERSECT;class_name;dist_th;ap;ap_crit\n")
-        AP_summary = {'Model': [], 'MAX_DISTANCE_OBJ': [],'MAX_DISTANCE_INTERSECT': [], 'MAX_TIME_INTERSECT': [],
-                      'class_name': [], 'dist_th': [],'ap': [], 'ap_crit': []}
         
         for class_name in self.cfg.class_names:
             # Compute APs.
@@ -163,18 +161,6 @@ class DetectionEval:
                         ";"+str(dist_th)+
                         ";"+str(ap)+
                         ";"+str(ap_crit)+"\n")
-
-                ## Create summary in json ##
-                AP_summary['Model'].append(self.model_name)
-                AP_summary['MAX_DISTANCE_OBJ'].append(self.MAX_DISTANCE_OBJ)
-                AP_summary['MAX_DISTANCE_INTERSECT'].append(self.MAX_DISTANCE_INTERSECT)
-                AP_summary['MAX_TIME_INTERSECT'].append(self.MAX_TIME_INTERSECT)
-                AP_summary['class_name'].append(class_name)
-                AP_summary['dist_th'].append(dist_th)
-                AP_summary['ap'].append(ap)
-                AP_summary['ap_crit'].append(ap_crit)
-
-
                 
             # Compute TP metrics.
             for metric_name in TP_METRICS:
@@ -190,10 +176,7 @@ class DetectionEval:
         # Compute evaluation time.
         metrics.add_runtime(time.time() - start_time)
         f.close()
-        with open(os.path.join(self.output_dir,'AP_SUMMARY.json'), 'w') as fp:
-            print("Saved AP_SUMMARY json..\n")
-            # Save APs in json format 
-            json.dump(AP_summary, fp)
+
 
         return metrics, metric_data_list
 
@@ -279,6 +262,8 @@ class DetectionEval:
 
 
         f = open(save_path+"/AP_summary.txt", "a")
+        f.write("Model;class_name;dist_th;AP;AP_crit\n")
+
         # Compute APs.
         for class_name in self.cfg.class_names:
             for dist_th in dist_ths:
@@ -291,11 +276,11 @@ class DetectionEval:
                 # PARAMETERS MAX_DIST(...) are constant for these experiments and have ..
                 # been evaluated at different values in Ceccarelli & Montecchi (2022)
                 # See algo.py write to confusion_matrix.txt for lower level metrics
-                f.write("Model " + str(self.model_name) +
-                        "; class_name " + str(class_name) +
-                        "; dist_th " + str(dist_th) +
-                        "; AP " + str(ap) +
-                        "; AP_crit " + str(ap_crit) +
+                f.write(str(self.model_name)+";"+
+                        str(class_name)+";"+
+                        str(dist_th)+";"+
+                        str(ap)+";"+
+                        str(ap_crit)+
                         "\n")
 
         f.close()
@@ -328,20 +313,12 @@ class DetectionEval:
 
 
 
-    def safety_metric_evaluation(self, 
-                                save_metrics_samples: int,
-                                pkl_path: str,
-                                worst_best: bool) -> None:
+    def safety_metric_evaluation(self,
+                                sample_tokens: List[str]) -> None:
         """ collection of relevant samples
          and metric data for safety-oriented metrics.
-         :param save_metric_samples: number of samples to evaluate/save
-         :param save_pkl: lookup PKL of sample in file
-         :param worst_best: worst visualizations for worst and best PKL results """
-        # random subset
-        random.seed(42)
-        sample_tokens = list(self.sample_tokens)
-        random.shuffle(sample_tokens)
-        sample_tokens = sample_tokens[:save_metrics_samples]
+         :param sample_tokens list of sample tokens to evaluate """
+    
 
         # Create necessary directories
         samples_directory = os.path.join(self.output_dir, 'METRIC_SAMPLES')
@@ -406,7 +383,8 @@ class DetectionEval:
              MAX_DISTANCE_INTERSECT=0.0,
              MAX_TIME_INTERSECT=0.0,
              recall_type="NONE",
-             save_metrics_samples=0) -> Dict[str, Any]:
+             save_metrics_samples=False,
+             samples_tokens_path=None) -> Dict[str, Any]:
 
         self.model_name=model_name
         self.MAX_DISTANCE_OBJ=MAX_DISTANCE_OBJ
@@ -417,21 +395,23 @@ class DetectionEval:
         Main function that loads the evaluation code, visualizes samples, runs the evaluation and renders stat plots.
         :param plot_examples: How many example visualizations to write to disk.
         :param render_curves: Whether to render PR and TP curves to disk.
-        :param save_metrics_samples(int) save safety metrics related data for individual samples and save data with samples.
-
+        :param save_metrics_samples(bool) whether to save safety metrics related data for individual samples 
+        :param tokens_path(str) path to json file with sample tokens for samples selected for individual evaluation
 
         :return: A dict that stores the high-level metrics and meta data.
         """
         print("STARTING EVALUATION in main (self)")
         if save_metrics_samples > 0:
-            self.safety_metric_evaluation(save_metrics_samples, None, False)
+            with open(samples_tokens_path, 'r') as f:
+                pre_saved_samples = json.load(f)
+            self.safety_metric_evaluation(sample_tokens = pre_saved_samples['sample_tokens'])
     
 
 
 
         if plot_examples > 0:
             # Select a random but fixed subset to plot.
-            random.seed(42)
+            #random.seed(42)
             sample_tokens = list(self.sample_tokens)
             random.shuffle(sample_tokens)
             sample_tokens = sample_tokens[:plot_examples]

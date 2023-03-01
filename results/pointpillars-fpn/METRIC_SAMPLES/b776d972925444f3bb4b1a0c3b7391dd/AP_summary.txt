@@ -1,0 +1,11 @@
+Model;class_name;dist_th;AP;AP_crit
+pointpillars-fpn;car;2.0;0.8527908708206267;0.9268596445691414
+pointpillars-fpn;truck;2.0;0.6431724653946878;0.5775630823190152
+pointpillars-fpn;bus;2.0;0.9894179894179898;0.9888888888888892
+pointpillars-fpn;trailer;2.0;0.0;0.0
+pointpillars-fpn;construction_vehicle;2.0;0.0;0.0
+pointpillars-fpn;pedestrian;2.0;0.0;0.0
+pointpillars-fpn;motorcycle;2.0;0.19537037037037036;0.16569798921081766
+pointpillars-fpn;bicycle;2.0;0.0;0.0
+pointpillars-fpn;traffic_cone;2.0;0.0;0.0
+pointpillars-fpn;barrier;2.0;0.0;0.0

@@ -1,2 +1,0 @@
-Model ssn-REGNET; class_name car; dist_th 2.0; TPs 7.0; FPs 23.0; FNs 0.0; TPs_pred_crit 3.134294628039574; TPs_gt_crit 1.7851845031875873; FPs_pred_crit 2.810428280948803; FNs_gt_crit -1.3491101248519866; Prec 0.23333333333333334; Rec 1.0; Prec_crit 0.3002973444714137; Rec_crit 1.0
-Model ssn-REGNET; class_name pedestrian; dist_th 2.0; TPs 3.0; FPs 5.0; FNs 0.0; TPs_pred_crit 1.9585863398961156; TPs_gt_crit 1.9939714070326255; FPs_pred_crit 1.8218733899346593; FNs_gt_crit 0.03538506713650991; Prec 0.375; Rec 1.0; Prec_crit 0.5274415149296887; Rec_crit 0.9822539746499329
