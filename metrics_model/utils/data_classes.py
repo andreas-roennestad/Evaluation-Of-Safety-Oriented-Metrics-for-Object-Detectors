@@ -15,7 +15,6 @@ from pyquaternion import Quaternion
 
 from nuscenes.utils.geometry_utils import view_points, transform_matrix
 
-
 class PointCloud(ABC):
     """
     Abstract class for manipulating and viewing point clouds.
@@ -627,6 +626,7 @@ class Box:
                   [center_bottom[1], center_bottom_forward[1]],
                   color=colors[0], linewidth=linewidth)
                 
+
     def render_crit(self,
                axis: Axes,
                view: np.ndarray = np.eye(3),
@@ -644,11 +644,12 @@ class Box:
         :param linewidth: Width in pixel of the box sides.
         :param offset_text: if True, display text in opposite corner to account for overlapping BBs in visualization
         """
-        if(self.name!='car'): #WORKS ONLY TO VISUALIZE CARS IN THIS WAY
+        rendered_classes = ['car', 'truck', "bus", "trailer", "construction_vehicle", "motorcycle", "bicycle", "pedestrian","barrier"]
+        if(self.name not in rendered_classes): #WORKS ONLY TO VISUALIZE CARS IN THIS WAY
             return
         
         corners = view_points(self.corners(), view, normalize=normalize)[:2, :]
-
+        
         def draw_rect(selected_corners, color):
             prev = selected_corners[-1]
             for corner in selected_corners:
@@ -694,7 +695,8 @@ class Box:
             back and sides.
         :param linewidth: Width in pixel of the box sides.
         """
-        if(self.name!='car'): #WORKS ONLY TO VISUALIZE CARS IN THIS WAY
+        rendered_classes = ['car', 'truck', "bus", "trailer", "constriction_vehicle", "motorcycle", "pedestrian"]
+        if(self.name not in rendered_classes): #WORKS ONLY TO VISUALIZE CARS IN THIS WAY
             return
         
         corners = view_points(self.corners(), view, normalize=normalize)[:2, :]
@@ -745,7 +747,8 @@ class Box:
             back and sides.
         :param linewidth: Width in pixel of the box sides.
         """
-        if(self.name!='car'): #WORKS ONLY TO VISUALIZE CARS IN THIS WAY
+        rendered_classes = ['car', 'truck', "bus", "trailer", "constriction_vehicle", "motorcycle", "pedestrian"]
+        if(self.name not in rendered_classes): #WORKS ONLY TO VISUALIZE CARS IN THIS WAY
             return
         
         corners = view_points(self.corners(), view, normalize=normalize)[:2, :]
@@ -796,7 +799,8 @@ class Box:
             back and sides.
         :param linewidth: Width in pixel of the box sides.
         """
-        if(self.name!='car'): #WORKS ONLY TO VISUALIZE CARS IN THIS WAY
+        rendered_classes = ['car', 'truck', "bus", "trailer", "constriction_vehicle", "motorcycle", "pedestrian"]
+        if(self.name not in rendered_classes): #WORKS ONLY TO VISUALIZE CARS IN THIS WAY
             return
         
         corners = view_points(self.corners(), view, normalize=normalize)[:2, :]

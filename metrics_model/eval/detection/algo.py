@@ -38,7 +38,7 @@ def accumulate(gt_boxes: EvalBoxes,
     # Organize input and initialize accumulators.
     # ---------------------------------------------
 
-    #count positives with GT values for crit, crit_r, crit_t, crit_d 
+    """#count positives with GT values for crit, crit_r, crit_t, crit_d 
     gt_crit=0.0
     gt_crit_r=0.0
     gt_crit_t=0.0
@@ -47,9 +47,11 @@ def accumulate(gt_boxes: EvalBoxes,
         gt_crit=gt_crit + gt_box.crit
         gt_crit_r=gt_crit_r + gt_box.crit_r
         gt_crit_d=gt_crit_d + gt_box.crit_d
-        gt_crit_t=gt_crit_t + gt_box.crit_t
+        gt_crit_t=gt_crit_t + gt_box.crit_t"""
 
-    # Count the positives.
+
+    conf_thresh_sample = 0.15
+    # Count the positives.###
     npos = len([1 for gt_box in gt_boxes.all if gt_box.detection_name == class_name])
 
     npos_crit1=[]
@@ -61,7 +63,10 @@ def accumulate(gt_boxes: EvalBoxes,
     for i in npos_crit1:
         if(i>0.0): #TODO: il problema è nei NaN in data_classes, dovuti alle divisioni per 0. Qualcosa da aggiustare nelle formule.
             npos_crit=npos_crit+i
-                
+
+    
+
+    ####
     if verbose:
         print("number values:  {} GT of class {} out of {} total across {} samples.".
               format(npos, class_name, len(gt_boxes.all), len(gt_boxes.sample_tokens)))
@@ -69,10 +74,10 @@ def accumulate(gt_boxes: EvalBoxes,
               format(npos_crit, class_name, len(gt_boxes.all), len(gt_boxes.sample_tokens)))
 
     # For missing classes in the GT, return a data structure corresponding to no predictions.
-    if npos == 0 and not single_sample: # if viewing individual samples this will generate warning for all classes not present in scene
+    if npos == 0: # if viewing individual samples this will generate warning for all classes not present in scene
         print("ALGO.PY WARNING : NO GT PREDICTIONS, CLASS: {}".format(class_name))
         return DetectionMetricData.no_predictions()
-    if npos_crit == 0 and not single_sample:
+    if npos_crit == 0:
         print("ALGO.PY WARNING : NO CRIT GT PREDICTIONS, CLASS: {}".format(class_name))
         return DetectionMetricData.no_predictions()
 
@@ -94,6 +99,13 @@ def accumulate(gt_boxes: EvalBoxes,
     tp_pred_crit = []  # Accumulator of true positives crit. predicted
     fp_pred_crit = []  # Accumulator of false positives crit. predicted
     tp_gt_crit = []  # Accumulator of true positives crit. ground truth
+
+    # For single sample analyzing (snapshot at specific confidence) 
+    tp_s = []  # Accumulator of true positives.
+    fp_s = []  # Accumulator of false positives.
+    tp_s_crit = []  # Accumulator of true positives crit. predicted above conf_th
+    fp_s_crit = []  # Accumulator of false positives crit. predicted above conf_th
+    tp_gts_crit = []  # Accumulator of true positives crit. ground truth above conf_th
 
     # match_data holds the extra metrics we calculate for each match.
     match_data = {'trans_err': [],
@@ -151,6 +163,16 @@ def accumulate(gt_boxes: EvalBoxes,
 
             match_data['attr_err'].append(1 - attr_acc(gt_box_match, pred_box))
             match_data['conf'].append(pred_box.detection_score)
+            
+            
+            if single_sample and pred_box.detection_score > conf_thresh_sample: 
+                # Boxes are sorted so all rest are above conf_th (to get low level metrics for conf_th)
+                tp_s.append(1)
+                tp_s_crit.append(pred_box.crit)
+                
+                fp_s.append(0)
+                fp_s_crit.append(0)
+                tp_gts_crit.append(gt_box_match.crit)
 
         else:
             # No match. Mark this as a false positive.
@@ -161,6 +183,15 @@ def accumulate(gt_boxes: EvalBoxes,
             fp.append(1)
             fp_pred_crit.append(pred_box.crit)
             conf.append(pred_box.detection_score)
+
+            if single_sample and pred_box.detection_score > conf_thresh_sample:
+                tp_s.append(0)
+                tp_s_crit.append(0)
+                tp_gts_crit.append(0)
+
+                fp_s.append(1)
+                fp_s_crit.append(pred_box.crit)
+
 
     # Check if we have any matches. If not, just return a "no predictions" array.
     if len(match_data['trans_err']) == 0:
@@ -181,7 +212,8 @@ def accumulate(gt_boxes: EvalBoxes,
     tp_gt_crit=np.cumsum(tp_gt_crit).astype(np.float)     #TODO: il problema è nei NaN in data_classes, dovuti alle divisioni per 0. Qualcosa da aggiustare nelle formule.
     fp_pred_crit=np.cumsum(fp_pred_crit).astype(np.float)
     conf = np.array(conf)
-        
+    
+
     # Calculate precision and recall.
     prec = tp / (fp + tp)
     rec = tp / float(npos)
@@ -231,16 +263,17 @@ def accumulate(gt_boxes: EvalBoxes,
                 ";"+str(np.amax(tp_pred_crit))+
                 ";"+str(np.amax(tp_gt_crit))+
                 ";"+str(np.amax(fp_pred_crit))+
-                ";"+ str(np.sum(npos_crit)-np.sum(tp_pred_crit_app))+
+                ";"+ str(np.sum(npos_crit)-np.amax(tp_pred_crit))+
                 "\n")
         f.close()
     else:
         # Precision and recall values for sample computed
-        tp_s = np.amax(tp)
-        fp_s = np.amax(fp)
-        tp_s_crit = np.amax(tp_pred_crit)
-        fp_s_crit = np.amax(fp_pred_crit)
-        tp_gts_crit = np.amax(tp_gt_crit)
+        # IMPORTANT: This is a "snapshot" of low-level metrics (Precision, Recall, TPs, (...)) at the SAME confidence value that the metric to be compared with is evaluated
+        tp_s = np.sum(tp_s).astype(np.float)
+        fp_s = np.sum(fp_s).astype(np.float)
+        tp_s_crit = np.sum(tp_s_crit).astype(np.float)
+        fp_s_crit = np.sum(fp_s_crit).astype(np.float)
+        tp_gts_crit = np.sum(tp_gts_crit).astype(np.float)
         prec_s = tp_s / (fp_s + tp_s)
         rec_s = tp_s / float(npos)
         #prec_s_crit = tp_s_crit / (fp_s_crit + tp_s_crit)
@@ -257,25 +290,25 @@ def accumulate(gt_boxes: EvalBoxes,
                 rec_s_crit=1.0
             if (prec_s_crit>1.0):
                 prec_s_crit=1.0
-
-        f = open(path+"/PR_summary.txt", "a")
-        f.write("class_name;dist_th;TPs;FPs;FNs;TPs_pred_crit;TPs_gt_crit;FPs_pred_crit;FNs_gt_crit;Prec;Rec;Prec_crit;Rec_crit\n")
-        f.write(str(model_name)+
-                ";"+str(class_name)+
-                ";"+str(dist_th)+
-                ";"+str(np.amax(tp))+
-                ";"+str(np.amax(fp))+
-                ";"+str(np.sum(npos)-np.amax(tp))+
-                ";"+str(np.amax(tp_pred_crit))+
-                ";"+str(np.amax(tp_gt_crit))+
-                ";"+str(np.amax(fp_pred_crit))+
-                ";"+ str(np.sum(npos_crit)-np.sum(tp_pred_crit_app))+   
-                ";"+ str(prec_s)+
-                ";"+ str(rec_s)+
-                ";"+ str(prec_s_crit)+
-                ";"+ str(rec_s_crit) +
-                "\n")
-        f.close()
+            f = open(path+"/threshold_metrics.txt", "a")
+            f.write("Model;Class;dist_th;conf_th;TPs;FPs;FNs;TPs_pred_crit;TPs_gt_crit;FPs_pred_crit;FNs_gt_crit;Prec;Rec;Prec_crit;Rec_crit\n")
+            f.write(str(model_name)+
+                    ";"+str(class_name)+
+                    ";"+str(dist_th)+
+                    ";"+str(conf_thresh_sample)+
+                    ";"+str(tp_s)+
+                    ";"+str(fp_s)+
+                    ";"+str(npos-tp_s)+
+                    ";"+str(tp_s_crit)+
+                    ";"+str(tp_gts_crit)+
+                    ";"+str(fp_s_crit)+
+                    ";"+ str(npos_crit-tp_s_crit)+   
+                    ";"+ str(prec_s)+
+                    ";"+ str(rec_s)+
+                    ";"+ str(prec_s_crit)+
+                    ";"+ str(rec_s_crit) +
+                    "\n")
+            f.close()
 
     # ---------------------------------------------
     # Re-sample the match-data to match, prec, recall and conf.

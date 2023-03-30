@@ -1,4 +1,0 @@
-class_name;dist_th;TPs;FPs;FNs;TPs_pred_crit;TPs_gt_crit;FPs_pred_crit;FNs_gt_crit;Prec;Rec;Prec_crit;Rec_crit
-pointpillars-fpn;car;2.0;8.0;35.0;0.0;3.2830817298007657;3.245344887850111;16.32116137674701;-0.03773684195065519;0.18604651162790697;1.0;0.16554298323132774;1.0
-class_name;dist_th;TPs;FPs;FNs;TPs_pred_crit;TPs_gt_crit;FPs_pred_crit;FNs_gt_crit;Prec;Rec;Prec_crit;Rec_crit
-pointpillars-fpn;pedestrian;2.0;18.0;61.0;0.0;15.356409912930353;15.140195364515439;48.98766480103507;-0.21621454841491428;0.22784810126582278;1.0;0.2353005374903521;1.0

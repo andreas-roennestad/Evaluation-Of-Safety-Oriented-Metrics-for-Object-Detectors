@@ -84,11 +84,11 @@ def visualize_sample(nusc: NuScenes,
     for box in boxes_est:
         # Show only predictions with a high score.
         assert not np.isnan(box.score), 'Error: Box score cannot be NaN!'
-        if box.score >= conf_th:
+        if box.score >= conf_th: # IMPORTANT: Boxes are not filtered on confidence during evaluation so should viz all boxes to get clear picture
             box.render(ax, view=np.eye(4), colors=('b', 'b', 'b'), linewidth=1)
 
     # Limit visible range.
-    axes_limit = eval_range + 3  # Slightly bigger to include boxes that extend beyond the range.
+    axes_limit = eval_range + 3  # Slightly bigger to include boxes that extend beyond the range. 
     ax.set_xlim(-axes_limit, axes_limit)
     ax.set_ylim(-axes_limit, axes_limit)
 
@@ -101,7 +101,6 @@ def visualize_sample(nusc: NuScenes,
         plt.close()
     else:
         plt.show()
-
 
 
 def visualize_sample_crit(nusc: NuScenes,
@@ -137,7 +136,6 @@ def visualize_sample_crit(nusc: NuScenes,
 
     # Map GT boxes to lidar.
     boxes_gt = boxes_to_sensor_crit(boxes_gt_global, pose_record, cs_record)
-
     # Map EST boxes to lidar.
     boxes_est = boxes_to_sensor_crit(boxes_est_global, pose_record, cs_record)
 
@@ -150,6 +148,12 @@ def visualize_sample_crit(nusc: NuScenes,
 
     # Init axes.
     _, ax = plt.subplots(1, 1, figsize=(9, 9))
+
+
+    # Limit visible range.
+    axes_limit = eval_range + 3  # Slightly bigger to include boxes that extend beyond the range.
+    ax.set_xlim(-axes_limit, axes_limit)
+    ax.set_ylim(-axes_limit, axes_limit)
 
     # Show point cloud.
     points = view_points(pc.points[:3, :], np.eye(4), normalize=False)
@@ -181,10 +185,6 @@ def visualize_sample_crit(nusc: NuScenes,
         if box.score >= conf_th:
             box.render_crit(ax, view=np.eye(4), colors=('b', 'b', 'b'), linewidth=1, offset_text=True)
 
-    # Limit visible range.
-    axes_limit = eval_range + 3  # Slightly bigger to include boxes that extend beyond the range.
-    ax.set_xlim(-axes_limit, axes_limit)
-    ax.set_ylim(-axes_limit, axes_limit)
 
     # Show / save plot.
     if verbose:
@@ -326,6 +326,11 @@ def visualize_sample_crit_d(nusc: NuScenes,
     # Init axes.
     _, ax = plt.subplots(1, 1, figsize=(9, 9))
 
+    # Limit visible range.
+    axes_limit = eval_range + 3  # Slightly bigger to include boxes that extend beyond the range.
+    ax.set_xlim(-axes_limit, axes_limit)
+    ax.set_ylim(-axes_limit, axes_limit)
+
     # Show point cloud.
     points = view_points(pc.points[:3, :], np.eye(4), normalize=False)
     dists = np.sqrt(np.sum(pc.points[:2, :] ** 2, axis=0))
@@ -346,10 +351,7 @@ def visualize_sample_crit_d(nusc: NuScenes,
         if box.score >= conf_th:
             box.render_crit_d(ax, view=np.eye(4), colors=('b', 'b', 'b'), linewidth=1, offset_text=True)
 
-    # Limit visible range.
-    axes_limit = eval_range + 3  # Slightly bigger to include boxes that extend beyond the range.
-    ax.set_xlim(-axes_limit, axes_limit)
-    ax.set_ylim(-axes_limit, axes_limit)
+
 
     # Show / save plot.
     if verbose:
@@ -409,6 +411,11 @@ def visualize_sample_crit_t(nusc: NuScenes,
     # Init axes.
     _, ax = plt.subplots(1, 1, figsize=(9, 9))
 
+    # Limit visible range.
+    axes_limit = eval_range + 3  # Slightly bigger to include boxes that extend beyond the range.
+    ax.set_xlim(-axes_limit, axes_limit)
+    ax.set_ylim(-axes_limit, axes_limit)
+
     # Show point cloud.
     points = view_points(pc.points[:3, :], np.eye(4), normalize=False)
     dists = np.sqrt(np.sum(pc.points[:2, :] ** 2, axis=0))
@@ -429,10 +436,7 @@ def visualize_sample_crit_t(nusc: NuScenes,
         if box.score >= conf_th:
             box.render_crit_t(ax, view=np.eye(4), colors=('b', 'b', 'b'), linewidth=1, offset_text = True)
 
-    # Limit visible range.
-    axes_limit = eval_range + 3  # Slightly bigger to include boxes that extend beyond the range.
-    ax.set_xlim(-axes_limit, axes_limit)
-    ax.set_ylim(-axes_limit, axes_limit)
+
 
     # Show / save plot.
     if verbose:

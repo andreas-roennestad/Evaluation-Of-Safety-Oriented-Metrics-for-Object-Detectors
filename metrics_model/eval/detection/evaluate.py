@@ -337,6 +337,13 @@ class DetectionEval:
             
             
             ## Save lidar birds eye (with crit vals)
+            visualize_sample(self.nusc,
+                             sample_token,
+                             self.gt_boxes if self.eval_set != 'test' else EvalBoxes(),
+                             # Don't render test GT.
+                             self.pred_boxes,
+                             eval_range=max(self.cfg.class_range.values()),
+                             savepath=os.path.join(sample_dir, 'LIDAR.png'.format(sample_token)))
             visualize_sample_crit(self.nusc,
                              sample_token,
                              self.gt_boxes if self.eval_set != 'test' else EvalBoxes(),
@@ -370,7 +377,7 @@ class DetectionEval:
             self.calc_sample_crit(sample_token=sample_token, save_path=sample_dir)
             
             ## Save images with annotations
-            self.nusc.render_sample(sample_token, out_path=os.path.join(sample_dir, 'SENSOR_ANN_VIZ.png'.format(sample_token)))
+            self.nusc.render_sample(sample_token, out_path=os.path.join(sample_dir, 'SENSOR_ANN_VIZ.png'.format(sample_token)), verbose=False)
             
             print("Sample {} data saved.\n".format(sample_token))
         
@@ -401,9 +408,13 @@ class DetectionEval:
         :return: A dict that stores the high-level metrics and meta data.
         """
         print("STARTING EVALUATION in main (self)")
-        if save_metrics_samples > 0:
+
+        # ** HERE ** #
+        if save_metrics_samples == True:
             with open(samples_tokens_path, 'r') as f:
                 pre_saved_samples = json.load(f)
+
+            # Optionally add noise, remove or add BBs to test sensitivity of models to errors, noise, FPs, FNs (only for specific selected samples)
             self.safety_metric_evaluation(sample_tokens = pre_saved_samples['sample_tokens'])
     
 
@@ -420,14 +431,14 @@ class DetectionEval:
             example_dir = os.path.join(self.output_dir, 'examples_gt_only')
             if not os.path.isdir(example_dir):
                 os.mkdir(example_dir)
-            for sample_token in sample_tokens:
+            """for sample_token in sample_tokens:
                 visualize_sample_debug_1(self.nusc,
                                  sample_token,
                                  self.gt_boxes if self.eval_set != 'test' else EvalBoxes(),
                                  # Don't render test GT.
                                  self.pred_boxes,
                                  eval_range=max(self.cfg.class_range.values()),
-                                 savepath=os.path.join(example_dir, '{}.png'.format(sample_token)))
+                                 savepath=os.path.join(example_dir, '{}.png'.format(sample_token)))"""
                 
             # Visualize samples without crit
             example_dir = os.path.join(self.output_dir, 'examples_clean')
@@ -534,6 +545,15 @@ class DetectionEval:
 #                     class_tps[class_name]['attr_err']))
 
         return metrics_summary
+
+    def filter_boxes_confidence(self, conf_th: float = 0.15):
+        """
+        Filter GT and Pred boxes on a confidence threshold. 
+        :param conf_th: confidence threshold.
+        """
+        for ind, sample_token in enumerate(self.pred_boxes.sample_tokens):
+            self.pred_boxes.boxes[sample_token] = [box for box in self.pred_boxes[sample_token] if
+                                          box.detection_score >= conf_th]
 
 
 class NuScenesEval(DetectionEval):
