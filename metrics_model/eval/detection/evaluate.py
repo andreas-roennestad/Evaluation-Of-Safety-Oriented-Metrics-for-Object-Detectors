@@ -6,9 +6,15 @@ import json
 import os
 import random
 import time
-from typing import Tuple, Dict, Any, List
-
+import math
 import numpy as np
+import torch
+
+from typing import Tuple, Dict, Any, List
+from pyquaternion import Quaternion
+
+from nuscenes.map_expansion.map_api import NuScenesMap
+from planning_centric_metrics import calculate_pkl
 
 from nuscenes import NuScenes
 from nuscenes.eval.common.config import config_factory
@@ -20,6 +26,9 @@ from nuscenes.eval.detection.data_classes import DetectionConfig, DetectionMetri
     DetectionMetricDataList
 from nuscenes.eval.detection.render import summary_plot, summary_plot_crit, class_pr_curve, class_pr_curve_crit, class_tp_curve, dist_pr_curve, visualize_sample, visualize_sample_crit, visualize_sample_crit_r, visualize_sample_crit_d, visualize_sample_crit_t, visualize_sample_debug_1 
 from nuscenes.eval.detection.utils import json_to_csv
+from nuscenes.utils.geometry_utils import transform_matrix
+from nuscenes.utils.data_classes import Box
+from nuscenes.eval.common.utils import boxes_to_sensor
 
 model_name="None",
 MAX_DISTANCE_OBJ=0.0,
@@ -218,6 +227,8 @@ class DetectionEval:
             dist_pr_curve(md_list, metrics, dist_th, self.cfg.min_precision, self.cfg.min_recall,
                           savepath=savepath('dist_pr_' + str(dist_th)))
 
+
+    
         
     def calc_sample_crit(self, sample_token: str, save_path: str, verbose: bool = False):
         # Get boxes.
@@ -232,14 +243,14 @@ class DetectionEval:
         
         boxes_gt.add_boxes(sample_token, self.gt_boxes.boxes[sample_token])
         boxes_pred.add_boxes(sample_token, self.pred_boxes.boxes[sample_token])
-    
-        #boxes_gt.add_boxes(sample_token, boxes_gt)
-        #boxes_pred.add_boxes(sample_token, boxes_pred)
+
+        # ADD FPs, remove boxes for FNs, or add orientation errors here. 
+        
         # Accumulate metric data for specific sample
         metric_data_list = DetectionMetricDataList()
 
 
-        #### IMPORTANT: ONLY USE DIST_TH = 2 FOR SINGLE SAMPLES ####
+        #### IMPORTANT: WE ONLY USE DIST_TH = 2 FOR SINGLE SAMPLES ####
         dist_ths = [2.0]
 
 
@@ -307,21 +318,50 @@ class DetectionEval:
         with open(os.path.join(save_path, 'metrics_summary.json'.format(sample_token)), 'w') as f:
             json.dump(metrics_summary, f, indent=2)
     
+        # CALCULATE PKLS
+        boxes_pred = self.filter_boxes_confidence(pred_boxes=boxes_pred, conf_th=0.15) # Filter BBs on confidence before PKL evaluation. default = 0.15
+
+        #print(torch.cuda.device_count())
+        #print(torch.cuda.is_available())
+        gpuid = -1
+        device = torch.device(f'cuda:{gpuid}') if gpuid >= 0\
+                else torch.device('cpu')
+        #print('using device: {0}'.format(device))
+
+        map_folder = '/cluster/work/andronn/MasterThesis/MASTER/mmdetection3d/data/nuscenes/maps/'
+        nusc_maps = {map_name: NuScenesMap(dataroot=map_folder,
+                        map_name=map_name) for map_name in [
+                            "singapore-hollandvillage",
+                            "singapore-queenstown",
+                            "boston-seaport",
+                            "singapore-onenorth",
+                        ]}
+        nworkers = 2
+
+        pkl = calculate_pkl(boxes_gt, boxes_pred,
+                                [sample_token], self.nusc,
+                                nusc_maps, device,
+                                nworkers=nworkers, bsz=16,
+                                plot_kextremes=0,
+                                verbose=True)
+        with open(os.path.join(save_path,'pkl_results.json'), 'w') as fp:
+            json.dump(pkl, fp)
+
 
         print("Saved metric data for sample {}".format(sample_token))
         
 
 
 
-    def safety_metric_evaluation(self,
-                                sample_tokens: List[str]) -> None:
+    def safety_metric_evaluation(self, sample_tokens: List[str], add_falses: bool = False) -> None:
         """ collection of relevant samples
          and metric data for safety-oriented metrics.
-         :param sample_tokens list of sample tokens to evaluate """
+         :param sample_tokens: list of sample tokens to evaluate.
+         :param add_falses: save in alternate folder for storing results modified with FPs and FNs ."""
     
 
         # Create necessary directories
-        samples_directory = os.path.join(self.output_dir, 'METRIC_SAMPLES')
+        samples_directory = os.path.join(self.output_dir, 'METRIC_SAMPLES_MODIFIED' if add_falses else 'METRIC_SAMPLES')
         if not os.path.isdir(samples_directory):
                 os.mkdir(samples_directory)
 
@@ -391,7 +431,8 @@ class DetectionEval:
              MAX_TIME_INTERSECT=0.0,
              recall_type="NONE",
              save_metrics_samples=False,
-             samples_tokens_path=None) -> Dict[str, Any]:
+             samples_tokens_path=None,
+             modified_predictions=False) -> Dict[str, Any]:
 
         self.model_name=model_name
         self.MAX_DISTANCE_OBJ=MAX_DISTANCE_OBJ
@@ -415,7 +456,7 @@ class DetectionEval:
                 pre_saved_samples = json.load(f)
 
             # Optionally add noise, remove or add BBs to test sensitivity of models to errors, noise, FPs, FNs (only for specific selected samples)
-            self.safety_metric_evaluation(sample_tokens = pre_saved_samples['sample_tokens'])
+            self.safety_metric_evaluation(sample_tokens = pre_saved_samples['sample_tokens'], add_falses=modified_predictions)
     
 
 
@@ -546,14 +587,101 @@ class DetectionEval:
 
         return metrics_summary
 
-    def filter_boxes_confidence(self, conf_th: float = 0.15):
+    def filter_boxes_confidence(self, pred_boxes, conf_th: float = 0.15):
         """
         Filter GT and Pred boxes on a confidence threshold. 
+        :param pred_boxes: boxes to filter.
         :param conf_th: confidence threshold.
         """
-        for ind, sample_token in enumerate(self.pred_boxes.sample_tokens):
-            self.pred_boxes.boxes[sample_token] = [box for box in self.pred_boxes[sample_token] if
+        for ind, sample_token in enumerate(pred_boxes.sample_tokens):
+            pred_boxes.boxes[sample_token] = [box for box in pred_boxes[sample_token] if
                                           box.detection_score >= conf_th]
+
+        return pred_boxes
+
+
+    def add_FP(self, sample_token: str, pos: Tuple[float, float], size):
+        """
+        Add a FP prediction in coordinates in coordinates coords wrt. ego reference frame
+        :param sample_token: Sample to operate on.
+        :param pos: 2D coordinates to place FP in with format Tuple[x, y] (z same as ego).
+        :param size: FP size.
+        """
+        print("Adding FP at position {0} relative to ego at sample {1}".format(pos, sample_token))     
+
+        # Get ego reference
+        sample = self.nusc.get('sample', sample_token)
+        sd_record = self.nusc.get('sample_data', sample['data']['LIDAR_TOP'])
+        cs_record = self.nusc.get('calibrated_sensor', sd_record['calibrated_sensor_token'])
+        pose_record = self.nusc.get('ego_pose', sd_record['ego_pose_token'])
+        ego_translation = pose_record['translation']
+        ego_rotation = pose_record['rotation']
+    
+        # Create FP box
+        fp_box = DetectionBox(
+            sample_token=sample_token,
+            translation=ego_translation,
+            rotation=ego_rotation,
+            size=size,
+            detection_score=0.5,
+            num_pts=25,
+            attribute_name='vehicle.stopped',
+            nusc=self.nusc
+        )
+        
+        # Create Box instance.
+        box = Box(center=fp_box.translation, size=fp_box.size, orientation=Quaternion(fp_box.rotation), velocity=(fp_box.velocity[0],fp_box.velocity[1],0),
+                    name=fp_box.detection_name, crit=fp_box.crit, crit_t=fp_box.crit_t, crit_r=fp_box.crit_r, crit_d=fp_box.crit_d)
+        # Move box to ego vehicle coord system.
+        box.translate(-np.array(pose_record['translation']))
+        box.rotate(Quaternion(pose_record['rotation']).inverse)
+
+        # Place FP at pos coordinates (note: x and y coordinates are in opposite positions in ego frame: trans=(y,x,z))
+        box.center[0]+=pos[1]
+        box.center[1]-=pos[0] # positive x-axis to right
+
+        # Transform to global ref frame
+        box.rotate(Quaternion(pose_record['rotation']))
+        box.translate(np.array(pose_record['translation']))
+
+        # Change translation of fp_box
+        fp_box.translation = box.center
+        # add box
+        self.pred_boxes.add_boxes(sample_token, [fp_box])
+
+    def add_FN(self, sample_token: str, dist: float = 10, remove_all: bool = True):
+        """
+        Add FN to sample by removing BB that is less than dist from ego (dist as a measure of importance)
+        :param sample_token: sample token.
+        :param dist: distance within which predictions are removed.
+        :param remove_all: remove all BBs that fit criteria dist(ego, pred)<10 (or first one detected).
+        """
+        
+        print("Removing {0} within {1}m from ego at sample {2}".format("all BBs" if remove_all else "first found BB", dist, sample_token))
+        def bbs_dist(trans_1, trans_2): 
+            """ Return Euclidean dist between BB centers """
+            return math.sqrt((trans_2[0]-trans_1[0])**2+(trans_2[1]-trans_1[1])**2+(trans_2[2]-trans_1[2])**2)
+
+        sample = self.nusc.get('sample', sample_token)
+        sd_record = self.nusc.get('sample_data', sample['data']['LIDAR_TOP'])
+        pose_record = self.nusc.get('ego_pose', sd_record['ego_pose_token'])
+        ego_translation = pose_record['translation']
+        it = 0
+        while it < len(self.pred_boxes[sample_token]):
+            # Remove correctly predicted boxes within dist
+            if bbs_dist(ego_translation, self.pred_boxes[sample_token][it].translation) < dist:
+                # Create Box instance for pred_box and transform to ego frame.
+                pred_box = self.pred_boxes[sample_token][it]
+                box = Box(center=pred_box.translation, size=pred_box.size, orientation=Quaternion(pred_box.rotation), velocity=(pred_box.velocity[0], pred_box.velocity[1],0))
+                # Move box to ego vehicle coord system.
+                box.translate(-np.array(pose_record['translation']))
+                box.rotate(Quaternion(pose_record['rotation']).inverse)
+                # if y-value of box.center is positive, predicted box is in front of ego (and is a candidate for removal)
+                if box.center[0] > 1.0:
+                    # 1.0 so that vehicles right next to ego with very similar y-val are excluded
+                    del self.pred_boxes[sample_token][it] 
+                if not remove_all: break
+            it += 1
 
 
 class NuScenesEval(DetectionEval):
