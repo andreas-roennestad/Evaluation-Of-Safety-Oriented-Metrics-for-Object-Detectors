@@ -461,7 +461,7 @@ class DetectionBox(EvalBox):
             # --> Secondo me é ok con questa nuova modifica, ma verifichiamo
             crit_r = 0.0
             crit_t = 0.0
-            print("detection/data_classes.py line 448, speed 0, no collisions -- check if OK")
+            print("detection/data_classes.py line 464, speed 0, no collisions -- check if OK")
 
         else:
 

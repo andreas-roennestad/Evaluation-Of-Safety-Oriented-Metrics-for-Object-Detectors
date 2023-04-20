@@ -230,7 +230,7 @@ class DetectionEval:
 
     
         
-    def calc_sample_crit(self, sample_token: str, save_path: str, verbose: bool = False):
+    def calc_sample_crit(self, sample_token: str, save_path: str, verbose: bool = False, conf_th_sample: float = 0.15):
         # Get boxes.
         # choose specific samples(!)
         # Get boxes corresponding to sample
@@ -249,6 +249,7 @@ class DetectionEval:
         # Accumulate metric data for specific sample
         metric_data_list = DetectionMetricDataList()
 
+        boxes_pred = self.filter_boxes_confidence(pred_boxes=boxes_pred, conf_th=conf_th_sample) # Filter BBs on confidence before PKL evaluation. default = 0.15
 
         #### IMPORTANT: WE ONLY USE DIST_TH = 2 FOR SINGLE SAMPLES ####
         dist_ths = [2.0]
@@ -319,7 +320,7 @@ class DetectionEval:
             json.dump(metrics_summary, f, indent=2)
     
         # CALCULATE PKLS
-        boxes_pred = self.filter_boxes_confidence(pred_boxes=boxes_pred, conf_th=0.15) # Filter BBs on confidence before PKL evaluation. default = 0.15
+        #boxes_pred = self.filter_boxes_confidence(pred_boxes=boxes_pred, conf_th=conf_th_sample) # Filter BBs on confidence before PKL evaluation. default = 0.15
 
         #print(torch.cuda.device_count())
         #print(torch.cuda.is_available())
@@ -353,15 +354,18 @@ class DetectionEval:
 
 
 
-    def safety_metric_evaluation(self, sample_tokens: List[str], add_falses: bool = False) -> None:
+    def safety_metric_evaluation(self, sample_tokens: List[str], add_falses: bool = False, random_token_predictions: bool = False, 
+                                    conf_th_sample: float = 0.15) -> None:
         """ collection of relevant samples
          and metric data for safety-oriented metrics.
          :param sample_tokens: list of sample tokens to evaluate.
-         :param add_falses: save in alternate folder for storing results modified with FPs and FNs ."""
+         :param add_falses: save in alternate folder for storing results modified with FPs and FNs .
+         :param inherited from main function """
     
 
         # Create necessary directories
         samples_directory = os.path.join(self.output_dir, 'METRIC_SAMPLES_MODIFIED' if add_falses else 'METRIC_SAMPLES')
+        if random_token_predictions==True: samples_directory = os.path.join(self.output_dir, 'METRIC_SAMPLES_RANDOM')
         if not os.path.isdir(samples_directory):
                 os.mkdir(samples_directory)
 
@@ -377,47 +381,54 @@ class DetectionEval:
             
             
             ## Save lidar birds eye (with crit vals)
-            visualize_sample(self.nusc,
-                             sample_token,
-                             self.gt_boxes if self.eval_set != 'test' else EvalBoxes(),
-                             # Don't render test GT.
-                             self.pred_boxes,
-                             eval_range=max(self.cfg.class_range.values()),
-                             savepath=os.path.join(sample_dir, 'LIDAR.png'.format(sample_token)))
-            visualize_sample_crit(self.nusc,
-                             sample_token,
-                             self.gt_boxes if self.eval_set != 'test' else EvalBoxes(),
-                             # Don't render test GT.
-                             self.pred_boxes,
-                             eval_range=max(self.cfg.class_range.values()),
-                             savepath=os.path.join(sample_dir, 'LIDAR_CRIT.png'.format(sample_token)))
-            visualize_sample_crit_r(self.nusc,
-                             sample_token,
-                             self.gt_boxes if self.eval_set != 'test' else EvalBoxes(),
-                             # Don't render test GT.
-                             self.pred_boxes,
-                             eval_range=max(self.cfg.class_range.values()),
-                             savepath=os.path.join(sample_dir, 'LIDAR_CRIT_R.png'.format(sample_token)))
-            visualize_sample_crit_t(self.nusc,
-                             sample_token,
-                             self.gt_boxes if self.eval_set != 'test' else EvalBoxes(),
-                             # Don't render test GT.
-                             self.pred_boxes,
-                             eval_range=max(self.cfg.class_range.values()),
-                             savepath=os.path.join(sample_dir, 'LIDAR_CRIT_T.png'.format(sample_token)))
-            visualize_sample_crit_d(self.nusc,
-                             sample_token,
-                             self.gt_boxes if self.eval_set != 'test' else EvalBoxes(),
-                             # Don't render test GT.
-                             self.pred_boxes,
-                             eval_range=max(self.cfg.class_range.values()),
-                             savepath=os.path.join(sample_dir, 'LIDAR_CRIT_D.png'.format(sample_token)))
+            if not random_token_predictions:
+                visualize_sample(self.nusc,
+                                sample_token,
+                                self.gt_boxes if self.eval_set != 'test' else EvalBoxes(),
+                                # Don't render test GT.
+                                self.pred_boxes,
+                                eval_range=max(self.cfg.class_range.values()),
+                                savepath=os.path.join(sample_dir, 'LIDAR.png'.format(sample_token)),
+                                verbose=False)
+                visualize_sample_crit(self.nusc,
+                                sample_token,
+                                self.gt_boxes if self.eval_set != 'test' else EvalBoxes(),
+                                # Don't render test GT.
+                                self.pred_boxes,
+                                eval_range=max(self.cfg.class_range.values()),
+                                savepath=os.path.join(sample_dir, 'LIDAR_CRIT.png'.format(sample_token)),
+                                verbose=False)
+                visualize_sample_crit_r(self.nusc,
+                                sample_token,
+                                self.gt_boxes if self.eval_set != 'test' else EvalBoxes(),
+                                # Don't render test GT.
+                                self.pred_boxes,
+                                eval_range=max(self.cfg.class_range.values()),
+                                savepath=os.path.join(sample_dir, 'LIDAR_CRIT_R.png'.format(sample_token)),
+                                verbose=False)
+                visualize_sample_crit_t(self.nusc,
+                                sample_token,
+                                self.gt_boxes if self.eval_set != 'test' else EvalBoxes(),
+                                # Don't render test GT.
+                                self.pred_boxes,
+                                eval_range=max(self.cfg.class_range.values()),
+                                savepath=os.path.join(sample_dir, 'LIDAR_CRIT_T.png'.format(sample_token)),
+                                verbose=False)
+                visualize_sample_crit_d(self.nusc,
+                                sample_token,
+                                self.gt_boxes if self.eval_set != 'test' else EvalBoxes(),
+                                # Don't render test GT.
+                                self.pred_boxes,
+                                eval_range=max(self.cfg.class_range.values()),
+                                savepath=os.path.join(sample_dir, 'LIDAR_CRIT_D.png'.format(sample_token)),
+                                verbose=False)
             
             ## Save sample specific metric data
-            self.calc_sample_crit(sample_token=sample_token, save_path=sample_dir)
+            self.calc_sample_crit(sample_token=sample_token, save_path=sample_dir, conf_th_sample=conf_th_sample)
             
             ## Save images with annotations
-            self.nusc.render_sample(sample_token, out_path=os.path.join(sample_dir, 'SENSOR_ANN_VIZ.png'.format(sample_token)), verbose=False)
+            if not random_token_predictions:
+                self.nusc.render_sample(sample_token, out_path=os.path.join(sample_dir, 'SENSOR_ANN_VIZ.png'.format(sample_token)), verbose=False)
             
             print("Sample {} data saved.\n".format(sample_token))
         
@@ -432,7 +443,9 @@ class DetectionEval:
              recall_type="NONE",
              save_metrics_samples=False,
              samples_tokens_path=None,
-             modified_predictions=False) -> Dict[str, Any]:
+             modified_predictions=False,
+             random_token_predictions=False,
+             conf_th_sample=0.15) -> Dict[str, Any]:
 
         self.model_name=model_name
         self.MAX_DISTANCE_OBJ=MAX_DISTANCE_OBJ
@@ -445,7 +458,8 @@ class DetectionEval:
         :param render_curves: Whether to render PR and TP curves to disk.
         :param save_metrics_samples(bool) whether to save safety metrics related data for individual samples 
         :param tokens_path(str) path to json file with sample tokens for samples selected for individual evaluation
-
+        :param random_token_predictions: true if generating metric data for large amounts of single samples, used in plotting
+        :param conf_th_sample: parameter passed down through safety_evaluation_metrics and calc_crit_sample as threshold for single samples.
         :return: A dict that stores the high-level metrics and meta data.
         """
         print("STARTING EVALUATION in main (self)")
@@ -456,9 +470,11 @@ class DetectionEval:
                 pre_saved_samples = json.load(f)
 
             # Optionally add noise, remove or add BBs to test sensitivity of models to errors, noise, FPs, FNs (only for specific selected samples)
-            self.safety_metric_evaluation(sample_tokens = pre_saved_samples['sample_tokens'], add_falses=modified_predictions)
-    
-
+            self.safety_metric_evaluation(sample_tokens = pre_saved_samples['sample_tokens'], 
+                                            add_falses=modified_predictions, 
+                                            random_token_predictions=random_token_predictions,
+                                            conf_th_sample=conf_th_sample)
+                                    
 
 
         if plot_examples > 0:
@@ -539,7 +555,10 @@ class DetectionEval:
                                  savepath=os.path.join(example_dir, '{}.png'.format(sample_token)))
 
         # Run evaluation.
-        metrics, metric_data_list = self.evaluate()
+        if not single_sample:
+            metrics, metric_data_list = self.evaluate()
+        else:
+            return
 
         # Render PR and TP curves.
         if render_curves:
@@ -600,7 +619,7 @@ class DetectionEval:
         return pred_boxes
 
 
-    def add_FP(self, sample_token: str, pos: Tuple[float, float], size):
+    def add_FP(self, sample_token: str, pos: Tuple[float, float], size: Tuple[float, float, float], match_ego_speed = False):
         """
         Add a FP prediction in coordinates in coordinates coords wrt. ego reference frame
         :param sample_token: Sample to operate on.
@@ -616,17 +635,18 @@ class DetectionEval:
         pose_record = self.nusc.get('ego_pose', sd_record['ego_pose_token'])
         ego_translation = pose_record['translation']
         ego_rotation = pose_record['rotation']
-    
+        ego_speed = self.pred_boxes[sample_token][0].ego_speed
         # Create FP box
         fp_box = DetectionBox(
             sample_token=sample_token,
             translation=ego_translation,
             rotation=ego_rotation,
             size=size,
-            detection_score=0.5,
+            detection_score=0.99,
             num_pts=25,
-            attribute_name='vehicle.stopped',
-            nusc=self.nusc
+            attribute_name='vehicle.moving' if match_ego_speed==True else 'vehicle.stopped',
+            velocity=(ego_speed[0],ego_speed[1]) if match_ego_speed==True else (0,0),
+            nusc=self.nusc,
         )
         
         # Create Box instance.
@@ -644,10 +664,21 @@ class DetectionEval:
         box.rotate(Quaternion(pose_record['rotation']))
         box.translate(np.array(pose_record['translation']))
 
-        # Change translation of fp_box
-        fp_box.translation = box.center
+        # Re-initialize Detection-Box to match new translation (to get correct criticalities)
+        fp_box_m = DetectionBox(
+            sample_token=sample_token,
+            translation=box.center,
+            rotation=ego_rotation,
+            size=size,
+            detection_score=0.99,
+            num_pts=25,
+            attribute_name='vehicle.moving' if match_ego_speed==True else 'vehicle.stopped',
+            velocity=(ego_speed[0],ego_speed[1]) if match_ego_speed==True else (0,0),
+            nusc=self.nusc,
+        )
+        
         # add box
-        self.pred_boxes.add_boxes(sample_token, [fp_box])
+        self.pred_boxes.add_boxes(sample_token, [fp_box_m])
 
     def add_FN(self, sample_token: str, dist: float = 10, remove_all: bool = True):
         """

@@ -22,7 +22,8 @@ def accumulate(gt_boxes: EvalBoxes,
                MAX_DISTANCE_OBJ=0.0,
                MAX_DISTANCE_INTERSECT=0.0,
                MAX_TIME_INTERSECT=0.0,
-               recall_type="NONE") -> DetectionMetricData:
+               recall_type="NONE",
+               conf_th_sample=0.15) -> DetectionMetricData:
     """
     Average Precision over predefined different recall thresholds for a single distance threshold.
     The recall/conf thresholds and other raw metrics will be used in secondary metrics.
@@ -32,25 +33,14 @@ def accumulate(gt_boxes: EvalBoxes,
     :param dist_fcn: Distance function used to match detections and ground truths.
     :param dist_th: Distance threshold for a match.
     :param verbose: If true, print debug messages.
+    :param conf_th_sample: Confidence threshold on which to evaluate single samples. (Only in use if single_sample=True)
     :return: (average_prec, metrics). The average precision value and raw data for a number of metrics.
     """
     # ---------------------------------------------
     # Organize input and initialize accumulators.
     # ---------------------------------------------
 
-    """#count positives with GT values for crit, crit_r, crit_t, crit_d 
-    gt_crit=0.0
-    gt_crit_r=0.0
-    gt_crit_t=0.0
-    gt_crit_d=0.0
-    for gt_box in gt_boxes.all:
-        gt_crit=gt_crit + gt_box.crit
-        gt_crit_r=gt_crit_r + gt_box.crit_r
-        gt_crit_d=gt_crit_d + gt_box.crit_d
-        gt_crit_t=gt_crit_t + gt_box.crit_t"""
 
-
-    conf_thresh_sample = 0.15
     # Count the positives.###
     npos = len([1 for gt_box in gt_boxes.all if gt_box.detection_name == class_name])
 
@@ -75,10 +65,10 @@ def accumulate(gt_boxes: EvalBoxes,
 
     # For missing classes in the GT, return a data structure corresponding to no predictions.
     if npos == 0: # if viewing individual samples this will generate warning for all classes not present in scene
-        print("ALGO.PY WARNING : NO GT PREDICTIONS, CLASS: {}".format(class_name))
+        if not single_sample: print("ALGO.PY WARNING : NO GT PREDICTIONS, CLASS: {}".format(class_name))
         return DetectionMetricData.no_predictions()
     if npos_crit == 0:
-        print("ALGO.PY WARNING : NO CRIT GT PREDICTIONS, CLASS: {}".format(class_name))
+        if not single_sample: print("ALGO.PY WARNING : NO CRIT GT PREDICTIONS, CLASS: {}".format(class_name))
         return DetectionMetricData.no_predictions()
 
     # Organize the predictions in a single list.
@@ -165,7 +155,7 @@ def accumulate(gt_boxes: EvalBoxes,
             match_data['conf'].append(pred_box.detection_score)
             
             
-            if single_sample and pred_box.detection_score > conf_thresh_sample: 
+            if single_sample: 
                 # Boxes are sorted so all rest are above conf_th (to get low level metrics for conf_th)
                 tp_s.append(1)
                 tp_s_crit.append(pred_box.crit)
@@ -184,7 +174,7 @@ def accumulate(gt_boxes: EvalBoxes,
             fp_pred_crit.append(pred_box.crit)
             conf.append(pred_box.detection_score)
 
-            if single_sample and pred_box.detection_score > conf_thresh_sample:
+            if single_sample:
                 tp_s.append(0)
                 tp_s_crit.append(0)
                 tp_gts_crit.append(0)
@@ -295,7 +285,7 @@ def accumulate(gt_boxes: EvalBoxes,
             f.write(str(model_name)+
                     ";"+str(class_name)+
                     ";"+str(dist_th)+
-                    ";"+str(conf_thresh_sample)+
+                    ";"+str(conf_th_sample)+
                     ";"+str(tp_s)+
                     ";"+str(fp_s)+
                     ";"+str(npos-tp_s)+
