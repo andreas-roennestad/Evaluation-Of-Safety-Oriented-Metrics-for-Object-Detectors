@@ -203,7 +203,6 @@ def accumulate(gt_boxes: EvalBoxes,
     fp_pred_crit=np.cumsum(fp_pred_crit).astype(np.float)
     conf = np.array(conf)
     
-
     # Calculate precision and recall.
     prec = tp / (fp + tp)
     rec = tp / float(npos)

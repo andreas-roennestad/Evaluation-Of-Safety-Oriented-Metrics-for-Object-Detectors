@@ -1,0 +1,4 @@
+Model;Class;dist_th;conf_th;TPs;FPs;FNs;TPs_pred_crit;TPs_gt_crit;FPs_pred_crit;FNs_gt_crit;Prec;Rec;Prec_crit;Rec_crit
+regnet-regnetX_FPN;car;2.0;0.15;4.0;4.0;2.0;0.10325208243667328;0.954456513407914;1.9709826594893674;0.9274774285261241;0.5;0.6666666666666666;0.46014874503627723;0.10017379083308307
+Model;Class;dist_th;conf_th;TPs;FPs;FNs;TPs_pred_crit;TPs_gt_crit;FPs_pred_crit;FNs_gt_crit;Prec;Rec;Prec_crit;Rec_crit
+regnet-regnetX_FPN;bicycle;2.0;0.15;0.0;0.0;1.0;0.0;0.0;0.0;0.39108028443609477;nan;0.0;nan;0.0

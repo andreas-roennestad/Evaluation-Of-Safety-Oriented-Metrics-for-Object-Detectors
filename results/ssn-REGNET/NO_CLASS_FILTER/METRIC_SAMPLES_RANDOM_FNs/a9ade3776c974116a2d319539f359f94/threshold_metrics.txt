@@ -1,0 +1,2 @@
+Model;Class;dist_th;conf_th;TPs;FPs;FNs;TPs_pred_crit;TPs_gt_crit;FPs_pred_crit;FNs_gt_crit;Prec;Rec;Prec_crit;Rec_crit
+ssn-REGNET;motorcycle;2.0;0.15;1.0;0.0;0.0;0.9108440382303346;0.9036327591128893;0.0;-0.007211279117445235;1.0;1.0;0.9920828607151495;1.0

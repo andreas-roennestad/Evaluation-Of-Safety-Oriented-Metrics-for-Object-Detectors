@@ -1,0 +1,11 @@
+Model;class_name;dist_th;AP;AP_crit
+regnet-regnetX_FPN;car;2.0;0.0;0.0
+regnet-regnetX_FPN;truck;2.0;0.0;0.0
+regnet-regnetX_FPN;bus;2.0;0.0;0.0
+regnet-regnetX_FPN;trailer;2.0;0.0;0.0
+regnet-regnetX_FPN;construction_vehicle;2.0;0.0;0.0
+regnet-regnetX_FPN;pedestrian;2.0;0.02685185185185185;0.0
+regnet-regnetX_FPN;motorcycle;2.0;0.0;0.0
+regnet-regnetX_FPN;bicycle;2.0;0.0;0.0
+regnet-regnetX_FPN;traffic_cone;2.0;0.0;0.0
+regnet-regnetX_FPN;barrier;2.0;0.0;0.0

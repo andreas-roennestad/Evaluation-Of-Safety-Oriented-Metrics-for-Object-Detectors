@@ -19,6 +19,7 @@ from planning_centric_metrics import calculate_pkl
 from nuscenes import NuScenes
 from nuscenes.eval.common.config import config_factory
 from nuscenes.eval.common.data_classes import EvalBoxes
+from nuscenes.eval.common.utils import center_distance
 from nuscenes.eval.common.loaders import load_prediction, load_gt, add_center_dist, filter_eval_boxes
 from nuscenes.eval.detection.algo import accumulate, calc_ap, calc_ap_crit, calc_tp
 from nuscenes.eval.detection.constants import TP_METRICS
@@ -249,7 +250,9 @@ class DetectionEval:
         # Accumulate metric data for specific sample
         metric_data_list = DetectionMetricDataList()
 
-        boxes_pred = self.filter_boxes_confidence(pred_boxes=boxes_pred, conf_th=conf_th_sample) # Filter BBs on confidence before PKL evaluation. default = 0.15
+        boxes_pred = self.filter_boxes_confidence(pred_boxes=boxes_pred, conf_th=conf_th_sample) # Filter BBs on confidence before PKL evaluation
+        # FILTER TO ONLY INCLUDE CLASSES EVALUATED WITH OCM
+        boxes_gt, boxes_pred = self.filter_boxes_class(gt_boxes=boxes_gt, pred_boxes=boxes_pred)
 
         #### IMPORTANT: WE ONLY USE DIST_TH = 2 FOR SINGLE SAMPLES ####
         dist_ths = [2.0]
@@ -263,7 +266,7 @@ class DetectionEval:
                                 MAX_DISTANCE_OBJ=self.MAX_DISTANCE_OBJ, 
                                 MAX_DISTANCE_INTERSECT=self.MAX_DISTANCE_INTERSECT,
                                 MAX_TIME_INTERSECT=self.MAX_TIME_INTERSECT,
-                                recall_type=self.recall_type, verbose=False, single_sample=True)
+                                recall_type=self.recall_type, verbose=False, single_sample=True, conf_th_sample=conf_th_sample)
                 metric_data_list.set(class_name, dist_th, md)
 
 
@@ -320,7 +323,7 @@ class DetectionEval:
             json.dump(metrics_summary, f, indent=2)
     
         # CALCULATE PKLS
-        #boxes_pred = self.filter_boxes_confidence(pred_boxes=boxes_pred, conf_th=conf_th_sample) # Filter BBs on confidence before PKL evaluation. default = 0.15
+        
 
         #print(torch.cuda.device_count())
         #print(torch.cuda.is_available())
@@ -339,6 +342,7 @@ class DetectionEval:
                         ]}
         nworkers = 2
 
+        
         pkl = calculate_pkl(boxes_gt, boxes_pred,
                                 [sample_token], self.nusc,
                                 nusc_maps, device,
@@ -442,7 +446,7 @@ class DetectionEval:
              MAX_TIME_INTERSECT=0.0,
              recall_type="NONE",
              save_metrics_samples=False,
-             samples_tokens_path=None,
+             single_sample_tokens=None,
              modified_predictions=False,
              random_token_predictions=False,
              conf_th_sample=0.15) -> Dict[str, Any]:
@@ -457,7 +461,7 @@ class DetectionEval:
         :param plot_examples: How many example visualizations to write to disk.
         :param render_curves: Whether to render PR and TP curves to disk.
         :param save_metrics_samples(bool) whether to save safety metrics related data for individual samples 
-        :param tokens_path(str) path to json file with sample tokens for samples selected for individual evaluation
+        :param single_sample_tokens: list of sample tokens for individual samples to be evaluated
         :param random_token_predictions: true if generating metric data for large amounts of single samples, used in plotting
         :param conf_th_sample: parameter passed down through safety_evaluation_metrics and calc_crit_sample as threshold for single samples.
         :return: A dict that stores the high-level metrics and meta data.
@@ -466,11 +470,10 @@ class DetectionEval:
 
         # ** HERE ** #
         if save_metrics_samples == True:
-            with open(samples_tokens_path, 'r') as f:
-                pre_saved_samples = json.load(f)
+            pre_saved_samples = single_sample_tokens
 
             # Optionally add noise, remove or add BBs to test sensitivity of models to errors, noise, FPs, FNs (only for specific selected samples)
-            self.safety_metric_evaluation(sample_tokens = pre_saved_samples['sample_tokens'], 
+            self.safety_metric_evaluation(sample_tokens = pre_saved_samples, 
                                             add_falses=modified_predictions, 
                                             random_token_predictions=random_token_predictions,
                                             conf_th_sample=conf_th_sample)
@@ -555,7 +558,7 @@ class DetectionEval:
                                  savepath=os.path.join(example_dir, '{}.png'.format(sample_token)))
 
         # Run evaluation.
-        if not single_sample:
+        if not save_metrics_samples:
             metrics, metric_data_list = self.evaluate()
         else:
             return
@@ -608,7 +611,7 @@ class DetectionEval:
 
     def filter_boxes_confidence(self, pred_boxes, conf_th: float = 0.15):
         """
-        Filter GT and Pred boxes on a confidence threshold. 
+        Filter Pred boxes on a confidence threshold. 
         :param pred_boxes: boxes to filter.
         :param conf_th: confidence threshold.
         """
@@ -617,6 +620,22 @@ class DetectionEval:
                                           box.detection_score >= conf_th]
 
         return pred_boxes
+
+    def filter_boxes_class(self, gt_boxes, pred_boxes, classes: List[str] = ["car"]):
+        """
+        Filter GT and Pred boxes to only include a set of object classes. 
+        :param pred_boxes: boxes to filter.
+        :param classes: list of object class names.
+        """
+        for ind, sample_token in enumerate(pred_boxes.sample_tokens):
+            pred_boxes.boxes[sample_token] = [box for box in pred_boxes[sample_token] if
+                                          box.detection_name in classes]
+
+        for ind, sample_token in enumerate(gt_boxes.sample_tokens):
+            gt_boxes.boxes[sample_token] = [box for box in gt_boxes[sample_token] if
+                                          box.detection_name in classes]
+
+        return gt_boxes, pred_boxes
 
 
     def add_FP(self, sample_token: str, pos: Tuple[float, float], size: Tuple[float, float, float], match_ego_speed = False):
@@ -680,12 +699,13 @@ class DetectionEval:
         # add box
         self.pred_boxes.add_boxes(sample_token, [fp_box_m])
 
-    def add_FN(self, sample_token: str, dist: float = 10, remove_all: bool = True):
+    def add_FN(self, sample_token: str, dist: float = 10, remove_all: bool = True, classes: List[str] = ['car']):
         """
         Add FN to sample by removing BB that is less than dist from ego (dist as a measure of importance)
         :param sample_token: sample token.
         :param dist: distance within which predictions are removed.
         :param remove_all: remove all BBs that fit criteria dist(ego, pred)<10 (or first one detected).
+        :param object classes to consider when removing BBs, e.g. ['car', 'truck']
         """
         
         print("Removing {0} within {1}m from ego at sample {2}".format("all BBs" if remove_all else "first found BB", dist, sample_token))
@@ -698,22 +718,55 @@ class DetectionEval:
         pose_record = self.nusc.get('ego_pose', sd_record['ego_pose_token'])
         ego_translation = pose_record['translation']
         it = 0
+        shortest_dist = 999999.9
+        shortest_dist_idx = None
+
         while it < len(self.pred_boxes[sample_token]):
             # Remove correctly predicted boxes within dist
-            if bbs_dist(ego_translation, self.pred_boxes[sample_token][it].translation) < dist:
+            distance_pred = bbs_dist(ego_translation, self.pred_boxes[sample_token][it].translation)
+            if distance_pred < dist and self.pred_boxes[sample_token][it].detection_name in classes:
                 # Create Box instance for pred_box and transform to ego frame.
                 pred_box = self.pred_boxes[sample_token][it]
+                min_dist = 999999.9
+
+                # Check if box is match (if not, cant be FN)
+                for gt_idx, gt_box in enumerate(self.gt_boxes[pred_box.sample_token]):
+                    # Find closest match among ground truth boxes
+                    if gt_box.detection_name in classes:
+                        this_distance = self.cfg.dist_fcn_callable(gt_box, pred_box)
+                        if this_distance < min_dist:
+                            min_dist = this_distance
+
+                # If the closest match is close enough according to threshold we have a match!
+                is_match = min_dist < 2.0 # dist_th 2.0
+                if not is_match: 
+                    it+=1
+                    continue
+                
+                # Transform to ego ref frame and check location
                 box = Box(center=pred_box.translation, size=pred_box.size, orientation=Quaternion(pred_box.rotation), velocity=(pred_box.velocity[0], pred_box.velocity[1],0))
                 # Move box to ego vehicle coord system.
                 box.translate(-np.array(pose_record['translation']))
                 box.rotate(Quaternion(pose_record['rotation']).inverse)
                 # if y-value of box.center is positive, predicted box is in front of ego (and is a candidate for removal)
-                if box.center[0] > 1.0:
+                """if not box.center[0] > 1.0:
                     # 1.0 so that vehicles right next to ego with very similar y-val are excluded
-                    del self.pred_boxes[sample_token][it] 
-                if not remove_all: break
-            it += 1
+                    it += 1
+                    continue"""
+                #del self.pred_boxes[sample_token][it]
+                #if not remove_all: break
+                if remove_all:
+                    del self.pred_boxes[sample_token][it]
+                    continue
 
+                if distance_pred < shortest_dist:
+                    shortest_dist = distance_pred
+                    shortest_dist_idx = it
+                
+                
+            it += 1
+        if not remove_all and shortest_dist_idx:
+            del self.pred_boxes[sample_token][shortest_dist_idx]
 
 class NuScenesEval(DetectionEval):
     """

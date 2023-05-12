@@ -1,0 +1,4 @@
+Model;Class;dist_th;conf_th;TPs;FPs;FNs;TPs_pred_crit;TPs_gt_crit;FPs_pred_crit;FNs_gt_crit;Prec;Rec;Prec_crit;Rec_crit
+pointpillars-fpn;car;2.0;0.15;9.0;5.0;0.0;2.3151115330579364;2.9304432022232416;0.0;0.6153316691653048;0.6428571428571429;1.0;1.0;0.7900209535887026
+Model;Class;dist_th;conf_th;TPs;FPs;FNs;TPs_pred_crit;TPs_gt_crit;FPs_pred_crit;FNs_gt_crit;Prec;Rec;Prec_crit;Rec_crit
+pointpillars-fpn;pedestrian;2.0;0.15;2.0;2.0;1.0;1.790949969742159;1.8278950360610602;0.38630517254615293;0.9201583110015288;0.5;0.6666666666666666;0.8395410352045045;0.6605969899700506

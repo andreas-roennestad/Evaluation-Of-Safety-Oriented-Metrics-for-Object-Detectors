@@ -1,0 +1,14 @@
+Model;Class;dist_th;conf_th;TPs;FPs;FNs;TPs_pred_crit;TPs_gt_crit;FPs_pred_crit;FNs_gt_crit;Prec;Rec;Prec_crit;Rec_crit
+regnet-regnetX_FPN;car;2.0;0.15;8.0;5.0;1.0;5.3553803606467465;5.365929337638166;2.5255880158047375;1.0073567065501745;0.6153846153846154;0.8888888888888888;0.6808718270805002;0.8416787153214926
+Model;Class;dist_th;conf_th;TPs;FPs;FNs;TPs_pred_crit;TPs_gt_crit;FPs_pred_crit;FNs_gt_crit;Prec;Rec;Prec_crit;Rec_crit
+regnet-regnetX_FPN;truck;2.0;0.15;1.0;1.0;0.0;0.029830757898831828;0.03645988167884395;0.0;0.006629123780012125;0.5;1.0;1.0;0.8181803265736128
+Model;Class;dist_th;conf_th;TPs;FPs;FNs;TPs_pred_crit;TPs_gt_crit;FPs_pred_crit;FNs_gt_crit;Prec;Rec;Prec_crit;Rec_crit
+regnet-regnetX_FPN;bus;2.0;0.15;1.0;1.0;0.0;0.9995753967011501;0.99956208923369;0.9187932445114358;-1.3307467460088596e-05;0.5;1.0;0.5210479715733232;1.0
+Model;Class;dist_th;conf_th;TPs;FPs;FNs;TPs_pred_crit;TPs_gt_crit;FPs_pred_crit;FNs_gt_crit;Prec;Rec;Prec_crit;Rec_crit
+regnet-regnetX_FPN;construction_vehicle;2.0;0.15;1.0;3.0;0.0;0.3047069952506418;0.2750808129479917;0.3614382881457934;-0.029626182302650128;0.25;1.0;0.41294417269676303;1.0
+Model;Class;dist_th;conf_th;TPs;FPs;FNs;TPs_pred_crit;TPs_gt_crit;FPs_pred_crit;FNs_gt_crit;Prec;Rec;Prec_crit;Rec_crit
+regnet-regnetX_FPN;pedestrian;2.0;0.15;8.0;8.0;2.0;1.2159088730199397;1.2193921986309548;4.8693883764169374;1.1209190863264364;0.5;0.8;0.20038334179054199;0.5203245143301162
+Model;Class;dist_th;conf_th;TPs;FPs;FNs;TPs_pred_crit;TPs_gt_crit;FPs_pred_crit;FNs_gt_crit;Prec;Rec;Prec_crit;Rec_crit
+regnet-regnetX_FPN;traffic_cone;2.0;0.15;4.0;3.0;1.0;3.338331297779141;3.34904966590301;2.4192495295362773;1.0098137038624886;0.5714285714285714;0.8;0.5816765350499765;0.7677598830118967
+Model;Class;dist_th;conf_th;TPs;FPs;FNs;TPs_pred_crit;TPs_gt_crit;FPs_pred_crit;FNs_gt_crit;Prec;Rec;Prec_crit;Rec_crit
+regnet-regnetX_FPN;barrier;2.0;0.15;28.0;103.0;0.0;16.503381288951108;17.111699793926064;56.24935568827338;0.6083185049749567;0.21374045801526717;1.0;0.23520351954982732;0.964450141581441

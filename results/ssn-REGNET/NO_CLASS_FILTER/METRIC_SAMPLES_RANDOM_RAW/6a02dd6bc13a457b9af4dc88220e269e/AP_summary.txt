@@ -1,0 +1,11 @@
+Model;class_name;dist_th;AP;AP_crit
+ssn-REGNET;car;2.0;0.752530403752626;0.49619440668441284
+ssn-REGNET;truck;2.0;0.0;0.0
+ssn-REGNET;bus;2.0;0.0;0.0
+ssn-REGNET;trailer;2.0;0.0;0.0
+ssn-REGNET;construction_vehicle;2.0;0.0;0.0
+ssn-REGNET;pedestrian;2.0;0.35555555555555557;0.3666666666666667
+ssn-REGNET;motorcycle;2.0;0.9938271604938275;0.9994169140140863
+ssn-REGNET;bicycle;2.0;0.0;0.0
+ssn-REGNET;traffic_cone;2.0;0.0;0.0
+ssn-REGNET;barrier;2.0;0.0;0.0

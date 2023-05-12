@@ -1,0 +1,12 @@
+Model;Class;dist_th;conf_th;TPs;FPs;FNs;TPs_pred_crit;TPs_gt_crit;FPs_pred_crit;FNs_gt_crit;Prec;Rec;Prec_crit;Rec_crit
+pointpillars-fpn;car;2.0;0.15;7.0;6.0;2.0;4.440680124872326;4.4265706768620205;0.6607012148700458;1.9220569423245948;0.5384615384615384;0.7777777777777778;0.8677200119067299;0.697919791117292
+Model;Class;dist_th;conf_th;TPs;FPs;FNs;TPs_pred_crit;TPs_gt_crit;FPs_pred_crit;FNs_gt_crit;Prec;Rec;Prec_crit;Rec_crit
+pointpillars-fpn;truck;2.0;0.15;1.0;3.0;0.0;0.0029115416734883937;0.03645988167884395;0.23829906988823857;0.03354834000535556;0.25;1.0;0.15115372181506903;0.07985603736003981
+Model;Class;dist_th;conf_th;TPs;FPs;FNs;TPs_pred_crit;TPs_gt_crit;FPs_pred_crit;FNs_gt_crit;Prec;Rec;Prec_crit;Rec_crit
+pointpillars-fpn;construction_vehicle;2.0;0.15;1.0;2.0;0.0;0.28186610123924916;0.2750808129479917;0.9416725754320358;-0.006785288291257463;0.3333333333333333;1.0;0.2248239619987875;1.0
+Model;Class;dist_th;conf_th;TPs;FPs;FNs;TPs_pred_crit;TPs_gt_crit;FPs_pred_crit;FNs_gt_crit;Prec;Rec;Prec_crit;Rec_crit
+pointpillars-fpn;pedestrian;2.0;0.15;9.0;6.0;1.0;1.7311704472952278;1.7498782553820176;3.1093008230215116;0.6056575120511483;0.6;0.9;0.36150989390491994;0.7408206669092773
+Model;Class;dist_th;conf_th;TPs;FPs;FNs;TPs_pred_crit;TPs_gt_crit;FPs_pred_crit;FNs_gt_crit;Prec;Rec;Prec_crit;Rec_crit
+pointpillars-fpn;traffic_cone;2.0;0.15;3.0;1.0;2.0;2.4370315315804194;2.441351002305198;0.6664065767464493;1.9111134700612102;0.75;0.6;0.7866601224476757;0.5604761411269231
+Model;Class;dist_th;conf_th;TPs;FPs;FNs;TPs_pred_crit;TPs_gt_crit;FPs_pred_crit;FNs_gt_crit;Prec;Rec;Prec_crit;Rec_crit
+pointpillars-fpn;barrier;2.0;0.15;23.0;12.0;5.0;11.778229164378338;12.114269416872135;4.496562790749339;5.333470629547726;0.6571428571428571;0.8214285714285714;0.744357866464481;0.6883143875957382

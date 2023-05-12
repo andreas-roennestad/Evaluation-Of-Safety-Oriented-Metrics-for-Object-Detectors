@@ -1,0 +1,201 @@
+{
+  "label_aps": {
+    "car": {
+      "2.0": 0.10226337448559668
+    },
+    "truck": {
+      "2.0": 0.0
+    },
+    "bus": {
+      "2.0": 0.0
+    },
+    "trailer": {
+      "2.0": 0.0
+    },
+    "construction_vehicle": {
+      "2.0": 0.0
+    },
+    "pedestrian": {
+      "2.0": 0.6111111111111112
+    },
+    "motorcycle": {
+      "2.0": 0.0
+    },
+    "bicycle": {
+      "2.0": 0.0
+    },
+    "traffic_cone": {
+      "2.0": 0.0
+    },
+    "barrier": {
+      "2.0": 0.3333333333333333
+    }
+  },
+  "label_aps_crit": {
+    "car": {
+      "2.0": 0.10226337448559668
+    },
+    "truck": {
+      "2.0": 0.0
+    },
+    "bus": {
+      "2.0": 0.0
+    },
+    "trailer": {
+      "2.0": 0.0
+    },
+    "construction_vehicle": {
+      "2.0": 0.0
+    },
+    "pedestrian": {
+      "2.0": 0.6111111111111112
+    },
+    "motorcycle": {
+      "2.0": 0.0
+    },
+    "bicycle": {
+      "2.0": 0.0
+    },
+    "traffic_cone": {
+      "2.0": 0.0
+    },
+    "barrier": {
+      "2.0": 0.3333333333333333
+    }
+  },
+  "mean_dist_aps": {
+    "car": 0.10226337448559668,
+    "truck": 0.0,
+    "bus": 0.0,
+    "trailer": 0.0,
+    "construction_vehicle": 0.0,
+    "pedestrian": 0.6111111111111112,
+    "motorcycle": 0.0,
+    "bicycle": 0.0,
+    "traffic_cone": 0.0,
+    "barrier": 0.3333333333333333
+  },
+  "mean_ap": 0.10467078189300412,
+  "mean_ap_crit": 0.1054178582705382,
+  "label_tp_errors": {
+    "barrier": {
+      "trans_err": 1.0820522835055717,
+      "scale_err": 0.30975169949344267,
+      "orient_err": 0.05934070165657048,
+      "vel_err": NaN,
+      "attr_err": NaN
+    },
+    "car": {
+      "trans_err": 0.0,
+      "scale_err": 0.0,
+      "orient_err": 0.0,
+      "vel_err": 0.0,
+      "attr_err": 0.0
+    },
+    "truck": {
+      "trans_err": 0.0,
+      "scale_err": 0.0,
+      "orient_err": 0.0,
+      "vel_err": 0.0,
+      "attr_err": 0.0
+    },
+    "bus": {
+      "trans_err": 0.0,
+      "scale_err": 0.0,
+      "orient_err": 0.0,
+      "vel_err": 0.0,
+      "attr_err": 0.0
+    },
+    "trailer": {
+      "trans_err": 0.0,
+      "scale_err": 0.0,
+      "orient_err": 0.0,
+      "vel_err": 0.0,
+      "attr_err": 0.0
+    },
+    "construction_vehicle": {
+      "trans_err": 0.0,
+      "scale_err": 0.0,
+      "orient_err": 0.0,
+      "vel_err": 0.0,
+      "attr_err": 0.0
+    },
+    "pedestrian": {
+      "trans_err": 0.0,
+      "scale_err": 0.0,
+      "orient_err": 0.0,
+      "vel_err": 0.0,
+      "attr_err": 0.0
+    },
+    "motorcycle": {
+      "trans_err": 0.0,
+      "scale_err": 0.0,
+      "orient_err": 0.0,
+      "vel_err": 0.0,
+      "attr_err": 0.0
+    },
+    "bicycle": {
+      "trans_err": 0.0,
+      "scale_err": 0.0,
+      "orient_err": 0.0,
+      "vel_err": 0.0,
+      "attr_err": 0.0
+    },
+    "traffic_cone": {
+      "trans_err": 0.0,
+      "scale_err": 0.0,
+      "orient_err": 0.0,
+      "vel_err": 0.0,
+      "attr_err": 0.0
+    }
+  },
+  "tp_errors": {
+    "trans_err": 0.10820522835055717,
+    "scale_err": 0.030975169949344267,
+    "orient_err": 0.0059340701656570485,
+    "vel_err": 0.0,
+    "attr_err": 0.0
+  },
+  "tp_scores": {
+    "trans_err": 0.8917947716494429,
+    "scale_err": 0.9690248300506558,
+    "orient_err": 0.9940659298343429,
+    "vel_err": 1.0,
+    "attr_err": 1.0
+  },
+  "nd_score": 0.5378239440999463,
+  "eval_time": null,
+  "cfg": {
+    "class_range": {
+      "car": 50,
+      "truck": 50,
+      "bus": 50,
+      "trailer": 50,
+      "construction_vehicle": 50,
+      "pedestrian": 40,
+      "motorcycle": 40,
+      "bicycle": 40,
+      "traffic_cone": 30,
+      "barrier": 30
+    },
+    "dist_fcn": "center_distance",
+    "dist_ths": [
+      0.5,
+      1.0,
+      2.0,
+      4.0
+    ],
+    "dist_th_tp": 2.0,
+    "min_recall": 0.1,
+    "min_precision": 0.1,
+    "max_boxes_per_sample": 500,
+    "mean_ap_weight": 5
+  },
+  "meta": {
+    "use_lidar": true,
+    "use_camera": false,
+    "use_radar": false,
+    "use_map": false,
+    "use_external": false
+  }
+}

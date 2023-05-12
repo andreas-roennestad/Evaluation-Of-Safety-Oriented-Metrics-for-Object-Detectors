@@ -53,7 +53,7 @@ def visualize_crits(paths: List[str], detectors: List[str], sample_token: str, c
     drw =  ImageDraw.Draw(composite_img)
     for i in range(len(imgs)):
         # render detector names in frame
-        det_str = paths[i].split('/')[len(paths[i].split('/'))-3]
+        det_str = paths[i].split('/')[len(paths[i].split('/'))-4]
         drw.text((20 + i*imgs[0].width, 40), det_str, fill=(0, 0, 0))
 
     drw.text((40,20), "Parameters: " + crit_weight, fill=(255, 0, 0))

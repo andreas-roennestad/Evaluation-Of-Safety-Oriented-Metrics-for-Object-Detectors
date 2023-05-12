@@ -1,0 +1,201 @@
+{
+  "label_aps": {
+    "car": {
+      "2.0": 0.0
+    },
+    "truck": {
+      "2.0": 0.0
+    },
+    "bus": {
+      "2.0": 0.0
+    },
+    "trailer": {
+      "2.0": 0.0
+    },
+    "construction_vehicle": {
+      "2.0": 0.0
+    },
+    "pedestrian": {
+      "2.0": 0.9929453262786597
+    },
+    "motorcycle": {
+      "2.0": 0.0
+    },
+    "bicycle": {
+      "2.0": 0.0
+    },
+    "traffic_cone": {
+      "2.0": 0.4444444444444445
+    },
+    "barrier": {
+      "2.0": 0.8263382200508532
+    }
+  },
+  "label_aps_crit": {
+    "car": {
+      "2.0": 0.0
+    },
+    "truck": {
+      "2.0": 0.0
+    },
+    "bus": {
+      "2.0": 0.0
+    },
+    "trailer": {
+      "2.0": 0.0
+    },
+    "construction_vehicle": {
+      "2.0": 0.0
+    },
+    "pedestrian": {
+      "2.0": 0.9929453262786597
+    },
+    "motorcycle": {
+      "2.0": 0.0
+    },
+    "bicycle": {
+      "2.0": 0.0
+    },
+    "traffic_cone": {
+      "2.0": 0.4444444444444445
+    },
+    "barrier": {
+      "2.0": 0.8263382200508532
+    }
+  },
+  "mean_dist_aps": {
+    "car": 0.0,
+    "truck": 0.0,
+    "bus": 0.0,
+    "trailer": 0.0,
+    "construction_vehicle": 0.0,
+    "pedestrian": 0.9929453262786597,
+    "motorcycle": 0.0,
+    "bicycle": 0.0,
+    "traffic_cone": 0.4444444444444445,
+    "barrier": 0.8263382200508532
+  },
+  "mean_ap": 0.22637279907739574,
+  "mean_ap_crit": 0.2217154918411369,
+  "label_tp_errors": {
+    "barrier": {
+      "trans_err": 0.3326069222322636,
+      "scale_err": 0.27894094877589287,
+      "orient_err": 0.022367157207604602,
+      "vel_err": NaN,
+      "attr_err": NaN
+    },
+    "car": {
+      "trans_err": 0.0,
+      "scale_err": 0.0,
+      "orient_err": 0.0,
+      "vel_err": 0.0,
+      "attr_err": 0.0
+    },
+    "truck": {
+      "trans_err": 0.0,
+      "scale_err": 0.0,
+      "orient_err": 0.0,
+      "vel_err": 0.0,
+      "attr_err": 0.0
+    },
+    "bus": {
+      "trans_err": 0.0,
+      "scale_err": 0.0,
+      "orient_err": 0.0,
+      "vel_err": 0.0,
+      "attr_err": 0.0
+    },
+    "trailer": {
+      "trans_err": 0.0,
+      "scale_err": 0.0,
+      "orient_err": 0.0,
+      "vel_err": 0.0,
+      "attr_err": 0.0
+    },
+    "construction_vehicle": {
+      "trans_err": 0.0,
+      "scale_err": 0.0,
+      "orient_err": 0.0,
+      "vel_err": 0.0,
+      "attr_err": 0.0
+    },
+    "pedestrian": {
+      "trans_err": 0.0,
+      "scale_err": 0.0,
+      "orient_err": 0.0,
+      "vel_err": 0.0,
+      "attr_err": 0.0
+    },
+    "motorcycle": {
+      "trans_err": 0.0,
+      "scale_err": 0.0,
+      "orient_err": 0.0,
+      "vel_err": 0.0,
+      "attr_err": 0.0
+    },
+    "bicycle": {
+      "trans_err": 0.0,
+      "scale_err": 0.0,
+      "orient_err": 0.0,
+      "vel_err": 0.0,
+      "attr_err": 0.0
+    },
+    "traffic_cone": {
+      "trans_err": 0.0,
+      "scale_err": 0.0,
+      "orient_err": 0.0,
+      "vel_err": 0.0,
+      "attr_err": 0.0
+    }
+  },
+  "tp_errors": {
+    "trans_err": 0.03326069222322636,
+    "scale_err": 0.027894094877589287,
+    "orient_err": 0.0022367157207604602,
+    "vel_err": 0.0,
+    "attr_err": 0.0
+  },
+  "tp_scores": {
+    "trans_err": 0.9667393077767736,
+    "scale_err": 0.9721059051224107,
+    "orient_err": 0.9977632842792395,
+    "vel_err": 1.0,
+    "attr_err": 1.0
+  },
+  "nd_score": 0.6068472492565403,
+  "eval_time": null,
+  "cfg": {
+    "class_range": {
+      "car": 50,
+      "truck": 50,
+      "bus": 50,
+      "trailer": 50,
+      "construction_vehicle": 50,
+      "pedestrian": 40,
+      "motorcycle": 40,
+      "bicycle": 40,
+      "traffic_cone": 30,
+      "barrier": 30
+    },
+    "dist_fcn": "center_distance",
+    "dist_ths": [
+      0.5,
+      1.0,
+      2.0,
+      4.0
+    ],
+    "dist_th_tp": 2.0,
+    "min_recall": 0.1,
+    "min_precision": 0.1,
+    "max_boxes_per_sample": 500,
+    "mean_ap_weight": 5
+  },
+  "meta": {
+    "use_lidar": true,
+    "use_camera": false,
+    "use_radar": false,
+    "use_map": false,
+    "use_external": false
+  }
+}

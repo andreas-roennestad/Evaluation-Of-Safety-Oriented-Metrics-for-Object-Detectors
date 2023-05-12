@@ -1,0 +1,201 @@
+{
+  "label_aps": {
+    "car": {
+      "2.0": 1.0000000000000004
+    },
+    "truck": {
+      "2.0": 0.0
+    },
+    "bus": {
+      "2.0": 0.0
+    },
+    "trailer": {
+      "2.0": 0.0
+    },
+    "construction_vehicle": {
+      "2.0": 0.0
+    },
+    "pedestrian": {
+      "2.0": 0.3333333333333333
+    },
+    "motorcycle": {
+      "2.0": 0.0
+    },
+    "bicycle": {
+      "2.0": 0.0
+    },
+    "traffic_cone": {
+      "2.0": 0.0
+    },
+    "barrier": {
+      "2.0": 0.2161666666666667
+    }
+  },
+  "label_aps_crit": {
+    "car": {
+      "2.0": 1.0000000000000004
+    },
+    "truck": {
+      "2.0": 0.0
+    },
+    "bus": {
+      "2.0": 0.0
+    },
+    "trailer": {
+      "2.0": 0.0
+    },
+    "construction_vehicle": {
+      "2.0": 0.0
+    },
+    "pedestrian": {
+      "2.0": 0.3333333333333333
+    },
+    "motorcycle": {
+      "2.0": 0.0
+    },
+    "bicycle": {
+      "2.0": 0.0
+    },
+    "traffic_cone": {
+      "2.0": 0.0
+    },
+    "barrier": {
+      "2.0": 0.2161666666666667
+    }
+  },
+  "mean_dist_aps": {
+    "car": 1.0000000000000004,
+    "truck": 0.0,
+    "bus": 0.0,
+    "trailer": 0.0,
+    "construction_vehicle": 0.0,
+    "pedestrian": 0.3333333333333333,
+    "motorcycle": 0.0,
+    "bicycle": 0.0,
+    "traffic_cone": 0.0,
+    "barrier": 0.2161666666666667
+  },
+  "mean_ap": 0.15495000000000003,
+  "mean_ap_crit": 0.11337302753090713,
+  "label_tp_errors": {
+    "barrier": {
+      "trans_err": 0.15013380247548838,
+      "scale_err": 0.10337378376433369,
+      "orient_err": 0.019990638768852795,
+      "vel_err": NaN,
+      "attr_err": NaN
+    },
+    "car": {
+      "trans_err": 0.0,
+      "scale_err": 0.0,
+      "orient_err": 0.0,
+      "vel_err": 0.0,
+      "attr_err": 0.0
+    },
+    "truck": {
+      "trans_err": 0.0,
+      "scale_err": 0.0,
+      "orient_err": 0.0,
+      "vel_err": 0.0,
+      "attr_err": 0.0
+    },
+    "bus": {
+      "trans_err": 0.0,
+      "scale_err": 0.0,
+      "orient_err": 0.0,
+      "vel_err": 0.0,
+      "attr_err": 0.0
+    },
+    "trailer": {
+      "trans_err": 0.0,
+      "scale_err": 0.0,
+      "orient_err": 0.0,
+      "vel_err": 0.0,
+      "attr_err": 0.0
+    },
+    "construction_vehicle": {
+      "trans_err": 0.0,
+      "scale_err": 0.0,
+      "orient_err": 0.0,
+      "vel_err": 0.0,
+      "attr_err": 0.0
+    },
+    "pedestrian": {
+      "trans_err": 0.0,
+      "scale_err": 0.0,
+      "orient_err": 0.0,
+      "vel_err": 0.0,
+      "attr_err": 0.0
+    },
+    "motorcycle": {
+      "trans_err": 0.0,
+      "scale_err": 0.0,
+      "orient_err": 0.0,
+      "vel_err": 0.0,
+      "attr_err": 0.0
+    },
+    "bicycle": {
+      "trans_err": 0.0,
+      "scale_err": 0.0,
+      "orient_err": 0.0,
+      "vel_err": 0.0,
+      "attr_err": 0.0
+    },
+    "traffic_cone": {
+      "trans_err": 0.0,
+      "scale_err": 0.0,
+      "orient_err": 0.0,
+      "vel_err": 0.0,
+      "attr_err": 0.0
+    }
+  },
+  "tp_errors": {
+    "trans_err": 0.015013380247548839,
+    "scale_err": 0.010337378376433368,
+    "orient_err": 0.0019990638768852794,
+    "vel_err": 0.0,
+    "attr_err": 0.0
+  },
+  "tp_scores": {
+    "trans_err": 0.9849866197524512,
+    "scale_err": 0.9896626216235667,
+    "orient_err": 0.9980009361231147,
+    "vel_err": 1.0,
+    "attr_err": 1.0
+  },
+  "nd_score": 0.5747400177499132,
+  "eval_time": null,
+  "cfg": {
+    "class_range": {
+      "car": 50,
+      "truck": 50,
+      "bus": 50,
+      "trailer": 50,
+      "construction_vehicle": 50,
+      "pedestrian": 40,
+      "motorcycle": 40,
+      "bicycle": 40,
+      "traffic_cone": 30,
+      "barrier": 30
+    },
+    "dist_fcn": "center_distance",
+    "dist_ths": [
+      0.5,
+      1.0,
+      2.0,
+      4.0
+    ],
+    "dist_th_tp": 2.0,
+    "min_recall": 0.1,
+    "min_precision": 0.1,
+    "max_boxes_per_sample": 500,
+    "mean_ap_weight": 5
+  },
+  "meta": {
+    "use_lidar": true,
+    "use_camera": false,
+    "use_radar": false,
+    "use_map": false,
+    "use_external": false
+  }
+}

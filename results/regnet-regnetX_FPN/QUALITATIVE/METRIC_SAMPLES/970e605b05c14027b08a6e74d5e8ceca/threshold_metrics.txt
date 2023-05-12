@@ -1,0 +1,6 @@
+Model;Class;dist_th;conf_th;TPs;FPs;FNs;TPs_pred_crit;TPs_gt_crit;FPs_pred_crit;FNs_gt_crit;Prec;Rec;Prec_crit;Rec_crit
+regnet-regnetX_FPN;car;2.0;0.15;2.0;2.0;0.0;1.9979808575367626;1.997898161724601;1.8575588715978746;-8.269581216158173e-05;0.5;1.0;0.5181889701790267;1.0
+Model;Class;dist_th;conf_th;TPs;FPs;FNs;TPs_pred_crit;TPs_gt_crit;FPs_pred_crit;FNs_gt_crit;Prec;Rec;Prec_crit;Rec_crit
+regnet-regnetX_FPN;truck;2.0;0.15;2.0;0.0;0.0;1.244808806926448;1.2567614259764837;0.0;0.01195261905003564;1.0;1.0;1.0;0.9904893492090207
+Model;Class;dist_th;conf_th;TPs;FPs;FNs;TPs_pred_crit;TPs_gt_crit;FPs_pred_crit;FNs_gt_crit;Prec;Rec;Prec_crit;Rec_crit
+regnet-regnetX_FPN;trailer;2.0;0.15;1.0;3.0;0.0;0.9791727387863335;0.9718700688153097;2.343072558461671;-0.007302669971023801;0.25;1.0;0.2925341092725339;1.0

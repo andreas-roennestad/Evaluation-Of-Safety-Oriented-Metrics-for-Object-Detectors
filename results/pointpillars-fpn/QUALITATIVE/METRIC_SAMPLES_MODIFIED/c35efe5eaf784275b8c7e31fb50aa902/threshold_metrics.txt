@@ -1,0 +1,2 @@
+Model;Class;dist_th;conf_th;TPs;FPs;FNs;TPs_pred_crit;TPs_gt_crit;FPs_pred_crit;FNs_gt_crit;Prec;Rec;Prec_crit;Rec_crit
+pointpillars-fpn;pedestrian;2.0;0.15;0.0;7.0;2.0;0.0;0.0;3.521992891930305;0.7549147696599988;0.0;0.0;0.0;0.0

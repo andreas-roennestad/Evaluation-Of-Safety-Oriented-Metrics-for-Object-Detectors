@@ -1,0 +1,11 @@
+Model;class_name;dist_th;AP;AP_crit
+regnet-regnetX_FPN;car;2.0;0.798621007250637;0.822132825115902
+regnet-regnetX_FPN;truck;2.0;0.9888888888888892;0.7888888888888891
+regnet-regnetX_FPN;bus;2.0;0.990740740740741;0.9919564150310903
+regnet-regnetX_FPN;trailer;2.0;0.0;0.0
+regnet-regnetX_FPN;construction_vehicle;2.0;0.9888888888888892;0.8820576526304902
+regnet-regnetX_FPN;pedestrian;2.0;0.7501406533076036;0.2825076939826884
+regnet-regnetX_FPN;motorcycle;2.0;0.0;0.0
+regnet-regnetX_FPN;bicycle;2.0;0.0;0.0
+regnet-regnetX_FPN;traffic_cone;2.0;0.8058119437872058;0.7799706605903212
+regnet-regnetX_FPN;barrier;2.0;0.7996353206137533;0.7890552345399613
