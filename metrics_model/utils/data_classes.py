@@ -644,7 +644,7 @@ class Box:
         :param linewidth: Width in pixel of the box sides.
         :param offset_text: if True, display text in opposite corner to account for overlapping BBs in visualization
         """
-        rendered_classes = ['car', 'truck', "bus", "trailer", "construction_vehicle", "motorcycle", "bicycle", "pedestrian","barrier"]
+        rendered_classes = ['car']#, 'truck', "bus", "trailer", "construction_vehicle", "motorcycle", "bicycle", "pedestrian","barrier"]
         if(self.name not in rendered_classes): #WORKS ONLY TO VISUALIZE CARS IN THIS WAY
             return
         
@@ -695,7 +695,7 @@ class Box:
             back and sides.
         :param linewidth: Width in pixel of the box sides.
         """
-        rendered_classes = ['car', 'truck', "bus", "trailer", "constriction_vehicle", "motorcycle", "pedestrian"]
+        rendered_classes = ['car']#, 'truck', "bus", "trailer", "constriction_vehicle", "motorcycle", "pedestrian"]
         if(self.name not in rendered_classes): #WORKS ONLY TO VISUALIZE CARS IN THIS WAY
             return
         
@@ -747,7 +747,7 @@ class Box:
             back and sides.
         :param linewidth: Width in pixel of the box sides.
         """
-        rendered_classes = ['car', 'truck', "bus", "trailer", "constriction_vehicle", "motorcycle", "pedestrian"]
+        rendered_classes = ['car']#, 'truck', "bus", "trailer", "constriction_vehicle", "motorcycle", "pedestrian"]
         if(self.name not in rendered_classes): #WORKS ONLY TO VISUALIZE CARS IN THIS WAY
             return
         
@@ -799,7 +799,7 @@ class Box:
             back and sides.
         :param linewidth: Width in pixel of the box sides.
         """
-        rendered_classes = ['car', 'truck', "bus", "trailer", "constriction_vehicle", "motorcycle", "pedestrian"]
+        rendered_classes = ['car']#, 'truck', "bus", "trailer", "constriction_vehicle", "motorcycle", "pedestrian"]
         if(self.name not in rendered_classes): #WORKS ONLY TO VISUALIZE CARS IN THIS WAY
             return
         
@@ -852,6 +852,8 @@ class Box:
             back and sides.
         :param linewidth: Width in pixel of the box sides.
         """
+
+
         corners = view_points(self.corners(), view, normalize=normalize)[:2, :]
 
         def draw_rect(selected_corners, color):
