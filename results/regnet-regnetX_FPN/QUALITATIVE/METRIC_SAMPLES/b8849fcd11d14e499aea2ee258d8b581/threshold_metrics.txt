@@ -1,2 +1,0 @@
-Model;Class;dist_th;conf_th;TPs;FPs;FNs;TPs_pred_crit;TPs_gt_crit;FPs_pred_crit;FNs_gt_crit;Prec;Rec;Prec_crit;Rec_crit
-regnet-regnetX_FPN;car;2.0;0.15;1.0;3.0;0.0;0.976879440298886;0.9987303201888676;2.715176966288554;0.02185087988998169;0.25;1.0;0.2705078715500969;0.978121341218669
