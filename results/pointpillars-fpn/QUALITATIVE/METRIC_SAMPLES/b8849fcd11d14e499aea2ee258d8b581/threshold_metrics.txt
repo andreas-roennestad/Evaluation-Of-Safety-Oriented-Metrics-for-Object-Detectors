@@ -1,2 +1,0 @@
-Model;Class;dist_th;conf_th;TPs;FPs;FNs;TPs_pred_crit;TPs_gt_crit;FPs_pred_crit;FNs_gt_crit;Prec;Rec;Prec_crit;Rec_crit
-pointpillars-fpn;car;2.0;0.15;1.0;1.0;0.0;0.9983188123842646;0.9987303201888676;0.9384941949625335;0.000411507804603084;0.5;1.0;0.5156565535239814;0.9995879690480156
