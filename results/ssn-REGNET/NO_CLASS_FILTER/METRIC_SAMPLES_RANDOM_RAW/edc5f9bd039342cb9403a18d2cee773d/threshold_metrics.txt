@@ -1,4 +1,0 @@
-Model;Class;dist_th;conf_th;TPs;FPs;FNs;TPs_pred_crit;TPs_gt_crit;FPs_pred_crit;FNs_gt_crit;Prec;Rec;Prec_crit;Rec_crit
-ssn-REGNET;car;2.0;0.15;2.0;4.0;1.0;1.9156469458077754;1.6662086139664094;2.5313102124679037;-0.249438331841366;0.3333333333333333;0.6666666666666666;0.37468510594162924;1.0
-Model;Class;dist_th;conf_th;TPs;FPs;FNs;TPs_pred_crit;TPs_gt_crit;FPs_pred_crit;FNs_gt_crit;Prec;Rec;Prec_crit;Rec_crit
-ssn-REGNET;pedestrian;2.0;0.15;1.0;0.0;1.0;0.9999838901496939;0.999982614877485;0.0;0.9999897149415587;1.0;0.5;0.9999987247072463;0.49999854378281544

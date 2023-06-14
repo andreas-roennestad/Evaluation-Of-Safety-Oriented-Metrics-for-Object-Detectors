@@ -1,2 +1,0 @@
-Model;Class;dist_th;conf_th;TPs;FPs;FNs;TPs_pred_crit;TPs_gt_crit;FPs_pred_crit;FNs_gt_crit;Prec;Rec;Prec_crit;Rec_crit
-ssn-REGNET;traffic_cone;2.0;0.15;2.0;2.0;3.0;1.9486720625293752;1.9399734524302272;1.9564329285620654;2.852580000951981;0.5;0.4;0.49677882076302965;0.40586747722559813

@@ -1,2 +1,0 @@
-Model;Class;dist_th;conf_th;TPs;FPs;FNs;TPs_pred_crit;TPs_gt_crit;FPs_pred_crit;FNs_gt_crit;Prec;Rec;Prec_crit;Rec_crit
-ssn-REGNET;car;2.0;0.4;1.0;0.0;1.0;0.5819531328307919;0.5206704460177911;0.0;0.9374143634843821;1.0;0.5;0.8946948072692664;0.3830232871521643

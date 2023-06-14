@@ -1,8 +1,0 @@
-Model;Class;dist_th;conf_th;TPs;FPs;FNs;TPs_pred_crit;TPs_gt_crit;FPs_pred_crit;FNs_gt_crit;Prec;Rec;Prec_crit;Rec_crit
-ssn-REGNET;car;2.0;0.15;20.0;8.0;3.0;17.013419556538235;17.15579232810659;6.755903155212641;3.095313469391108;0.7142857142857143;0.8695652173913043;0.7217619339075764;0.8460711838284474
-Model;Class;dist_th;conf_th;TPs;FPs;FNs;TPs_pred_crit;TPs_gt_crit;FPs_pred_crit;FNs_gt_crit;Prec;Rec;Prec_crit;Rec_crit
-ssn-REGNET;truck;2.0;0.15;4.0;6.0;0.0;3.9600707951926157;3.9596019798947015;5.836406791083968;-0.0004688152979142046;0.4;1.0;0.4041862950252158;1.0
-Model;Class;dist_th;conf_th;TPs;FPs;FNs;TPs_pred_crit;TPs_gt_crit;FPs_pred_crit;FNs_gt_crit;Prec;Rec;Prec_crit;Rec_crit
-ssn-REGNET;bus;2.0;0.15;1.0;1.0;0.0;0.9897656304059502;0.9898912835009642;0.9951510348801464;0.00012565309501400002;0.5;1.0;0.49870672195615123;0.9998730637423439
-Model;Class;dist_th;conf_th;TPs;FPs;FNs;TPs_pred_crit;TPs_gt_crit;FPs_pred_crit;FNs_gt_crit;Prec;Rec;Prec_crit;Rec_crit
-ssn-REGNET;motorcycle;2.0;0.15;2.0;0.0;0.0;1.9894769974188304;1.9886678711030301;0.0;-0.0008091263158003237;1.0;1.0;0.9995932969736016;1.0
