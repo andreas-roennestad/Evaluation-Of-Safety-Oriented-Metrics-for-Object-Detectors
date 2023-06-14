@@ -231,30 +231,29 @@ class DetectionEval:
 
     
         
-    def calc_sample_crit(self, sample_token: str, save_path: str, verbose: bool = False, conf_th_sample: float = 0.15):
-        # Get boxes.
-        # choose specific samples(!)
-        # Get boxes corresponding to sample
+    def calc_sample_crit(self, sample_token: str, save_path: str, verbose: bool = False):
+        """ Method for computing safety-oriented metrics data for predictions over a single sample
+        :param sample_token: sample evaluated.
+        :param save_path: directory to store results.
+        :param verbose: print progress.
+        """
         if verbose:
-            print("sample token gt boxes len: {}".format(len(self.gt_boxes.serialize()[sample_token])))
-            print("sample token pred boxes len: {}".format(len(self.pred_boxes.serialize()[sample_token])))
+            print("Number of GT boxes: {}".format(len(self.gt_boxes.serialize()[sample_token])))
+            print("Number of Pred boxes: {}".format(len(self.pred_boxes.serialize()[sample_token])))
         
+        # Get boxes corresponding to sample
+
         boxes_gt = EvalBoxes()
         boxes_pred = EvalBoxes()
         
         boxes_gt.add_boxes(sample_token, self.gt_boxes.boxes[sample_token])
-        boxes_pred.add_boxes(sample_token, self.pred_boxes.boxes[sample_token])
-
-        # ADD FPs, remove boxes for FNs, or add orientation errors here. 
+        boxes_pred.add_boxes(sample_token, self.pred_boxes.boxes[sample_token]). 
         
         # Accumulate metric data for specific sample
         metric_data_list = DetectionMetricDataList()
 
-        boxes_pred = self.filter_boxes_confidence(pred_boxes=boxes_pred, conf_th=conf_th_sample) # Filter BBs on confidence before PKL evaluation
-        # FILTER TO ONLY INCLUDE CLASSES EVALUATED WITH OCM
-        boxes_gt, boxes_pred = self.filter_boxes_class(gt_boxes=boxes_gt, pred_boxes=boxes_pred)
 
-        #### IMPORTANT: WE ONLY USE DIST_TH = 2 FOR SINGLE SAMPLES ####
+        #### IMPORTANT: WE ONLY USE DIST_TH = 2 FOR SINGLE SAMPLES IN THIS SPECIFIC APPROACH ####
         dist_ths = [2.0]
 
 
@@ -299,7 +298,6 @@ class DetectionEval:
                         "\n")
 
         f.close()
-        # Mean_ap and mean_ap_crit are written to metrics_summary.json
 
         # Compute TP metrics.
         for metric_name in TP_METRICS:
@@ -312,8 +310,6 @@ class DetectionEval:
                 tp = calc_tp(metric_data, self.cfg.min_recall, metric_name)
             metrics.add_label_tp(class_name, metric_name, tp)
 
-        #AP_summary['mean_ap'] = metrics.mean_ap
-        #AP_summary['mean_ap_crit'] = metrics.mean_ap_crit
 
 
         metrics_summary = metrics.serialize()
@@ -322,9 +318,8 @@ class DetectionEval:
         with open(os.path.join(save_path, 'metrics_summary.json'.format(sample_token)), 'w') as f:
             json.dump(metrics_summary, f, indent=2)
     
-        # CALCULATE PKLS
+        # Compute PKL
         
-
         #print(torch.cuda.device_count())
         #print(torch.cuda.is_available())
         gpuid = -1
@@ -350,6 +345,7 @@ class DetectionEval:
                                 plot_kextremes=0,
                                 verbose=True)
         with open(os.path.join(save_path,'pkl_results.json'), 'w') as fp:
+            # save in pkl_results.json
             json.dump(pkl, fp)
 
 
@@ -360,23 +356,37 @@ class DetectionEval:
 
     def safety_metric_evaluation(self, sample_tokens: List[str], add_falses: bool = False, random_token_predictions: bool = False, 
                                     conf_th_sample: float = 0.15) -> None:
-        """ collection of relevant samples
-         and metric data for safety-oriented metrics.
+        """ High-level function comprising functionality related to evaluating over single samples
          :param sample_tokens: list of sample tokens to evaluate.
-         :param add_falses: save in alternate folder for storing results modified with FPs and FNs .
-         :param inherited from main function """
+         :param add_falses: for saving in alternate folder results injected with FPs and FNs .
+         :param (...)inherited from main function """
     
 
-        # Create necessary directories
+        # Set directory (METRIC_SAMPLES_MODIFIED IF FPs or FNs are injected)
         samples_directory = os.path.join(self.output_dir, 'METRIC_SAMPLES_MODIFIED' if add_falses else 'METRIC_SAMPLES')
+        # Note that in the experimental work performed, the above directories are utilized for storing qualitative results
         if random_token_predictions==True: samples_directory = os.path.join(self.output_dir, 'METRIC_SAMPLES_RANDOM')
+        # whereas the METRIC_SAMPLES RANDOM stores quantitative results (over random drawn sample tokens)
+
         if not os.path.isdir(samples_directory):
                 os.mkdir(samples_directory)
 
         for sample_token in sample_tokens:
-            ##
+            boxes_gt = EvalBoxes()
+            boxes_pred = EvalBoxes()
+            
+            boxes_gt.add_boxes(sample_token, self.gt_boxes.boxes[sample_token])
+            boxes_pred.add_boxes(sample_token, self.pred_boxes.boxes[sample_token]) 
+
+            # Filter BBs on confidence before PKL evaluation
+            boxes_pred = self.filter_boxes_confidence(pred_boxes=boxes_pred, conf_th=conf_th_sample)
+            
+            #Filter BBs on object class "car"
+            boxes_gt, boxes_pred = self.filter_boxes_class(gt_boxes=boxes_gt, pred_boxes=boxes_pred)
+
             sample_dir = os.path.join(samples_directory, str(sample_token))
             if not os.path.isdir(sample_dir):
+                # make dir
                 os.mkdir(sample_dir)
                 print("Made sample directory: {}\n".format(sample_dir))
 
@@ -384,51 +394,51 @@ class DetectionEval:
             sample = self.nusc.get('sample', sample_token)
             
             
-            ## Save lidar birds eye (with crit vals)
+            ## Save lidar birds eye (with crit vals) (not performed for quantitative results)
             if not random_token_predictions:
                 visualize_sample(self.nusc,
                                 sample_token,
-                                self.gt_boxes if self.eval_set != 'test' else EvalBoxes(),
+                                boxes_gt if self.eval_set != 'test' else EvalBoxes(),
                                 # Don't render test GT.
-                                self.pred_boxes,
+                                boxes_pred,
                                 eval_range=max(self.cfg.class_range.values()),
                                 savepath=os.path.join(sample_dir, 'LIDAR.png'.format(sample_token)),
                                 verbose=False)
                 visualize_sample_crit(self.nusc,
                                 sample_token,
-                                self.gt_boxes if self.eval_set != 'test' else EvalBoxes(),
+                                boxes_gt if self.eval_set != 'test' else EvalBoxes(),
                                 # Don't render test GT.
-                                self.pred_boxes,
+                                boxes_pred,
                                 eval_range=max(self.cfg.class_range.values()),
                                 savepath=os.path.join(sample_dir, 'LIDAR_CRIT.png'.format(sample_token)),
                                 verbose=False)
                 visualize_sample_crit_r(self.nusc,
                                 sample_token,
-                                self.gt_boxes if self.eval_set != 'test' else EvalBoxes(),
+                                boxes_gt if self.eval_set != 'test' else EvalBoxes(),
                                 # Don't render test GT.
-                                self.pred_boxes,
+                                boxes_pred,
                                 eval_range=max(self.cfg.class_range.values()),
                                 savepath=os.path.join(sample_dir, 'LIDAR_CRIT_R.png'.format(sample_token)),
                                 verbose=False)
                 visualize_sample_crit_t(self.nusc,
                                 sample_token,
-                                self.gt_boxes if self.eval_set != 'test' else EvalBoxes(),
+                                boxes_gt if self.eval_set != 'test' else EvalBoxes(),
                                 # Don't render test GT.
-                                self.pred_boxes,
+                                boxes_pred,
                                 eval_range=max(self.cfg.class_range.values()),
                                 savepath=os.path.join(sample_dir, 'LIDAR_CRIT_T.png'.format(sample_token)),
                                 verbose=False)
                 visualize_sample_crit_d(self.nusc,
                                 sample_token,
-                                self.gt_boxes if self.eval_set != 'test' else EvalBoxes(),
+                                boxes_gt if self.eval_set != 'test' else EvalBoxes(),
                                 # Don't render test GT.
-                                self.pred_boxes,
+                                boxes_pred,
                                 eval_range=max(self.cfg.class_range.values()),
                                 savepath=os.path.join(sample_dir, 'LIDAR_CRIT_D.png'.format(sample_token)),
                                 verbose=False)
             
             ## Save sample specific metric data
-            self.calc_sample_crit(sample_token=sample_token, save_path=sample_dir, conf_th_sample=conf_th_sample)
+            self.calc_sample_crit(sample_token=sample_token, save_path=sample_dir)
             
             ## Save images with annotations
             if not random_token_predictions:
@@ -460,19 +470,20 @@ class DetectionEval:
         Main function that loads the evaluation code, visualizes samples, runs the evaluation and renders stat plots.
         :param plot_examples: How many example visualizations to write to disk.
         :param render_curves: Whether to render PR and TP curves to disk.
-        :param save_metrics_samples(bool) whether to save safety metrics related data for individual samples 
+        :param model_name: deprecated
+        :param save_metrics_samples whether to save safety metrics related data for individual samples 
         :param single_sample_tokens: list of sample tokens for individual samples to be evaluated
-        :param random_token_predictions: true if generating metric data for large amounts of single samples, used in plotting
-        :param conf_th_sample: parameter passed down through safety_evaluation_metrics and calc_crit_sample as threshold for single samples.
+        :param random_token_predictions: true if generating metric data for randomly drawn, quantitative predictions 
+        over single samples. Plots are not generated if true.
+        :param conf_th_sample: parameter passed down through safety_evaluation_metrics and calc_crit_sample as threshold for single sample evaluation.
         :return: A dict that stores the high-level metrics and meta data.
         """
         print("STARTING EVALUATION in main (self)")
 
-        # ** HERE ** #
         if save_metrics_samples == True:
+            # If list of tokens is given as argument, perform single sample evaluation
             pre_saved_samples = single_sample_tokens
 
-            # Optionally add noise, remove or add BBs to test sensitivity of models to errors, noise, FPs, FNs (only for specific selected samples)
             self.safety_metric_evaluation(sample_tokens = pre_saved_samples, 
                                             add_falses=modified_predictions, 
                                             random_token_predictions=random_token_predictions,
@@ -491,14 +502,6 @@ class DetectionEval:
             example_dir = os.path.join(self.output_dir, 'examples_gt_only')
             if not os.path.isdir(example_dir):
                 os.mkdir(example_dir)
-            """for sample_token in sample_tokens:
-                visualize_sample_debug_1(self.nusc,
-                                 sample_token,
-                                 self.gt_boxes if self.eval_set != 'test' else EvalBoxes(),
-                                 # Don't render test GT.
-                                 self.pred_boxes,
-                                 eval_range=max(self.cfg.class_range.values()),
-                                 savepath=os.path.join(example_dir, '{}.png'.format(sample_token)))"""
                 
             # Visualize samples without crit
             example_dir = os.path.join(self.output_dir, 'examples_clean')
@@ -642,10 +645,12 @@ class DetectionEval:
         """
         Add a FP prediction in coordinates in coordinates coords wrt. ego reference frame
         :param sample_token: Sample to operate on.
-        :param pos: 2D coordinates to place FP in with format Tuple[x, y] (z same as ego).
-        :param size: FP size.
+        :param pos: Tuple[x, y]. 2D coordinates of FP in relation to ego, where
+        positive x and y point to right and front of ego, respectively. z coordinate is set equal to ego z.
+        :param size: Tuple[h,l,w]. Size of injected BB.
+        :param match_ego_speed: Boolean. Whether to match velocity of ego or to have null-velocity.
         """
-        print("Adding FP at position {0} relative to ego at sample {1}".format(pos, sample_token))     
+        print("Adding FP at position {} relative to ego at sample {}".format(pos, sample_token))     
 
         # Get ego reference
         sample = self.nusc.get('sample', sample_token)
@@ -701,7 +706,7 @@ class DetectionEval:
 
     def add_FN(self, sample_token: str, dist: float = 10, remove_all: bool = True, classes: List[str] = ['car']):
         """
-        Add FN to sample by removing BB that is less than dist from ego (dist as a measure of importance)
+        Add FN to predictions by removing BB that is less than dist from ego
         :param sample_token: sample token.
         :param dist: distance within which predictions are removed.
         :param remove_all: remove all BBs that fit criteria dist(ego, pred)<10 (or first one detected).
@@ -748,13 +753,7 @@ class DetectionEval:
                 # Move box to ego vehicle coord system.
                 box.translate(-np.array(pose_record['translation']))
                 box.rotate(Quaternion(pose_record['rotation']).inverse)
-                # if y-value of box.center is positive, predicted box is in front of ego (and is a candidate for removal)
-                """if not box.center[0] > 1.0:
-                    # 1.0 so that vehicles right next to ego with very similar y-val are excluded
-                    it += 1
-                    continue"""
-                #del self.pred_boxes[sample_token][it]
-                #if not remove_all: break
+                
                 if remove_all:
                     del self.pred_boxes[sample_token][it]
                     continue

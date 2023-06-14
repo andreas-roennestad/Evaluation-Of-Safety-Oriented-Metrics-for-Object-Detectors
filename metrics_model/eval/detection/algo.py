@@ -32,6 +32,7 @@ def accumulate(gt_boxes: EvalBoxes,
     :param class_name: Class to compute AP on.
     :param dist_fcn: Distance function used to match detections and ground truths.
     :param dist_th: Distance threshold for a match.
+    :param single_sample: specifies if single sample evaluation is performed or not
     :param verbose: If true, print debug messages.
     :param conf_th_sample: Confidence threshold on which to evaluate single samples. (Only in use if single_sample=True)
     :return: (average_prec, metrics). The average precision value and raw data for a number of metrics.
