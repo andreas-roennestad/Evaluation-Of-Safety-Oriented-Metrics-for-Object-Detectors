@@ -36,5 +36,3 @@ NOTE: The files of ./metrics_model that are excluded in the above are files not 
 
 ./results: 
 This is the directory where datasets of metric results are automatically stored upon creation. Furthermore, the JSON files specifying the samples selected for experiments are stored here. The JSON files present correspond to the samples used in this thesis. 
- not in use, either files inherited from the parent repo [Object criticality model](https://github.com/AndreaCeccarelli/metrics_model) or automatically generated files.
-
